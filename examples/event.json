@@ -1,0 +1,57 @@
+{
+  "id": "e9f0a1b2-c3d4-e5f6-a7b8-c9d0e1f2a3b4",
+  "title": "World Refugee Day Celebration 2024",
+  "type": "event",
+  "description": "Documentation of the World Refugee Day celebration held at Dzaleka Refugee Camp on June 20, 2024. The event featured cultural performances from Congolese, Burundian, Rwandan, and Somali communities, speeches by community leaders and UNHCR representatives, a football tournament, and an art exhibition by camp youth. Over 3,000 residents participated in the day's activities.",
+  "language": "en",
+  "creator": [
+    {
+      "name": "Dzaleka Cultural Committee",
+      "role": "organizer"
+    },
+    {
+      "name": "Fatoumata Diallo",
+      "role": "photographer"
+    },
+    {
+      "name": "Innocent Nshimiyimana",
+      "role": "author",
+      "affiliation": "Dzaleka Digital Heritage Project"
+    }
+  ],
+  "date": {
+    "created": "2024-06-25",
+    "event_date": "2024-06-20"
+  },
+  "subject": [
+    "World Refugee Day",
+    "celebration",
+    "cultural performance",
+    "community gathering",
+    "football",
+    "art exhibition",
+    "UNHCR"
+  ],
+  "location": {
+    "name": "Dzaleka Refugee Camp",
+    "area": "Main Ground",
+    "latitude": -13.7833,
+    "longitude": 33.9833
+  },
+  "format": "text/html",
+  "rights": {
+    "license": "CC-BY-4.0",
+    "access_level": "public",
+    "holder": "Dzaleka Cultural Committee"
+  },
+  "source": {
+    "contributor": "Dzaleka Cultural Committee",
+    "collection": "Community Events Archive"
+  },
+  "coverage": {
+    "start_date": "2024-06-20",
+    "end_date": "2024-06-20",
+    "period": "World Refugee Day 2024"
+  },
+  "schema_version": "1.0.0"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "b3c4d5e6-f7a8-9b0c-1d2e-3f4a5b6c7d8e",
+  "title": "Home Is a Word I Carry",
+  "type": "poem",
+  "description": "A poem reflecting on the experience of displacement and the meaning of home for refugees living in Dzaleka. The poet explores themes of memory, belonging, and identity through vivid imagery of landscapes left behind and the new life forged in the camp. Written in English with phrases in Swahili, the poem bridges languages and cultures to express a shared experience of exile and resilience.",
+  "language": "en",
+  "creator": [
+    {
+      "name": "Espérance Ndayisaba",
+      "role": "poet",
+      "affiliation": "Dzaleka Writers Collective"
+    }
+  ],
+  "date": {
+    "created": "2024-05-12",
+    "event_date": "2024-04-15"
+  },
+  "subject": [
+    "poetry",
+    "displacement",
+    "home",
+    "identity",
+    "belonging",
+    "exile",
+    "resilience",
+    "multilingual"
+  ],
+  "location": {
+    "name": "Dzaleka Refugee Camp",
+    "area": "Community Center"
+  },
+  "format": "text/plain",
+  "rights": {
+    "license": "CC-BY-NC-4.0",
+    "access_level": "public",
+    "holder": "Espérance Ndayisaba"
+  },
+  "source": {
+    "contributor": "Dzaleka Writers Collective",
+    "collection": "Dzaleka Poetry Archive"
+  },
+  "schema_version": "1.0.0"
+}

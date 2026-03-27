@@ -1,0 +1,51 @@
+{
+  "id": "c5d6e7f8-9a0b-1c2d-3e4f-5a6b7c8d9e0f",
+  "title": "Community School Registration Records, 2018",
+  "type": "document",
+  "description": "Digitized registration records from the Dzaleka Community Day Secondary School for the 2018 academic year. These records document student enrollment, nationalities represented, class assignments, and guardian information. The records provide valuable demographic data about education access in the camp.",
+  "language": "en",
+  "creator": [
+    {
+      "name": "Dzaleka Community Day Secondary School",
+      "role": "author"
+    },
+    {
+      "name": "Patrick Mwamba",
+      "role": "editor",
+      "affiliation": "Dzaleka Digital Heritage Project"
+    }
+  ],
+  "date": {
+    "created": "2024-01-20",
+    "event_date": "2018-01-15"
+  },
+  "subject": [
+    "education",
+    "school records",
+    "enrollment",
+    "demographics",
+    "youth",
+    "documentation"
+  ],
+  "location": {
+    "name": "Dzaleka Refugee Camp",
+    "area": "Section B"
+  },
+  "format": "application/pdf",
+  "rights": {
+    "license": "CC-BY-NC-4.0",
+    "access_level": "restricted",
+    "holder": "Dzaleka Community Day Secondary School"
+  },
+  "source": {
+    "contributor": "Dzaleka Community Day Secondary School",
+    "collection": "Education Archive",
+    "original_format": "handwritten ledger"
+  },
+  "coverage": {
+    "start_date": "2018-01-15",
+    "end_date": "2018-12-14",
+    "period": "2018 academic year"
+  },
+  "schema_version": "1.0.0"
+}

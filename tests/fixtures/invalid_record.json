@@ -1,0 +1,16 @@
+{
+  "id": "not-a-valid-uuid",
+  "title": "",
+  "type": "unknown_type",
+  "description": "",
+  "language": "not-a-valid-language",
+  "creator": "should be an array",
+  "location": {
+    "latitude": 999,
+    "longitude": -999
+  },
+  "rights": {
+    "access_level": "top-secret"
+  },
+  "extra_field": "should not be here"
+}

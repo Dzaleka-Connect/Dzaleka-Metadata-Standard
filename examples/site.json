@@ -1,0 +1,42 @@
+{
+  "id": "f1a2b3c4-d5e6-7f8a-9b0c-1d2e3f4a5b6c",
+  "title": "Dzaleka Health Centre",
+  "type": "site",
+  "description": "The primary healthcare facility serving a catchment population of 86,000 people, including 54,000 refugees and asylum-seekers from Dzaleka Refugee Camp and 32,000 local residents from Dowa District. The centre provides essential medical services including outpatient care, maternal health, HIV/AIDS treatment, and emergency services. It stands as one of the most important community infrastructure sites in the camp.",
+  "language": "en",
+  "creator": [
+    {
+      "name": "Dzaleka Online Services",
+      "role": "curator",
+      "affiliation": "Dzaleka Online Services"
+    }
+  ],
+  "date": {
+    "created": "2024-07-10"
+  },
+  "subject": [
+    "healthcare",
+    "health centre",
+    "community infrastructure",
+    "medical services",
+    "site register",
+    "public health"
+  ],
+  "location": {
+    "name": "Dzaleka Refugee Camp",
+    "area": "Health Centre",
+    "latitude": -13.7833,
+    "longitude": 33.9833
+  },
+  "format": "text/html",
+  "rights": {
+    "license": "CC-BY-4.0",
+    "access_level": "public",
+    "holder": "Dzaleka Online Services"
+  },
+  "source": {
+    "contributor": "Dzaleka Online Services",
+    "collection": "Dzaleka Site Register"
+  },
+  "schema_version": "1.0.0"
+}

@@ -1,0 +1,53 @@
+{
+  "id": "d7e8f9a0-b1c2-d3e4-f5a6-b7c8d9e0f1a2",
+  "title": "Traditional Songs of the Great Lakes Region",
+  "type": "audio",
+  "description": "A field recording of traditional songs performed by a group of elder women from the Burundian community at Dzaleka. The recording includes three songs: a harvest celebration song, a lullaby passed down through generations, and a wedding procession chant. The performers share brief explanations of each song's cultural significance between performances.",
+  "language": "rw",
+  "creator": [
+    {
+      "name": "Espérance Ndayisaba",
+      "role": "narrator"
+    },
+    {
+      "name": "Grace Mutoni",
+      "role": "narrator"
+    },
+    {
+      "name": "Samuel Habimana",
+      "role": "recorder",
+      "affiliation": "Dzaleka Heritage Audio Archive"
+    }
+  ],
+  "date": {
+    "created": "2024-04-08",
+    "event_date": "2024-03-22"
+  },
+  "subject": [
+    "traditional music",
+    "songs",
+    "Burundi",
+    "cultural heritage",
+    "women",
+    "elder knowledge",
+    "Great Lakes region"
+  ],
+  "location": {
+    "name": "Dzaleka Refugee Camp",
+    "area": "Community Center",
+    "latitude": -13.7833,
+    "longitude": 33.9833
+  },
+  "format": "audio/mpeg",
+  "rights": {
+    "license": "CC-BY-NC-4.0",
+    "access_level": "community-only",
+    "holder": "Dzaleka Heritage Audio Archive"
+  },
+  "source": {
+    "contributor": "Dzaleka Heritage Audio Archive",
+    "collection": "Traditional Music Archive",
+    "original_format": "live field recording"
+  },
+  "schema_version": "1.0.0"
+}

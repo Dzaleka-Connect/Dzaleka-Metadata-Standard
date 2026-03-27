@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DMS — Dzaleka Metadata Standard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+
+    /* ─── Minimalist Clean Theme (No AI Slop) ─── */
+    :root {
+      --bg: #f9fafb;
+      --surface: #ffffff;
+      --border: #e5e7eb;
+      --border-hover: #d1d5db;
+      --shadow: 0 1px 2px rgba(0,0,0,0.05);
+      
+      --accent: #ea580c;
+      --accent-hover: #c2410c;
+      --accent-bg: #fff7ed;
+      
+      --text: #111827;
+      --text-dim: #4b5563;
+      --text-muted: #9ca3af;
+      
+      --success: #059669;
+      --error: #dc2626;
+      --warning: #d97706;
+
+      --radius: 6px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    /* ─── Header ─── */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .header-left { display: flex; align-items: center; gap: 1rem; }
+    .logo {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .version {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-bg);
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+    }
+
+    /* ─── Tabs ─── */
+    .tabs { display: flex; gap: 0.25rem; }
+    .tab {
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-dim);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .tab:hover { color: var(--text); background: #f3f4f6; }
+    .tab.active {
+      color: var(--accent);
+      background: var(--accent-bg);
+      border-color: #fdba74;
+    }
+
+    /* ─── Layout ─── */
+    .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+    .page { display: none; }
+    .page.active { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* ─── Forms ─── */
+    .form-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .form-section h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.25rem; }
+    .form-row.full { grid-template-columns: 1fr; }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+    }
+    label .required { color: var(--error); }
+    .help-text {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: -0.25rem;
+      margin-bottom: 0.5rem;
+      display: block;
+      line-height: 1.3;
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], select, textarea {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      background: #fafafa;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      background: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-bg);
+    }
+    textarea { resize: vertical; min-height: 100px; }
+    select { 
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 1em;
+    }
+
+    /* ─── Buttons ─── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.25rem;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn:active { transform: translateY(1px); }
+    
+    .btn-primary { background: var(--text); color: white; }
+    .btn-primary:hover { background: #374151; }
+    
+    .btn-success { background: var(--accent); color: white; }
+    .btn-success:hover { background: var(--accent-hover); }
+    
+    .btn-secondary { background: #fff; color: var(--text-dim); border-color: var(--border); }
+    .btn-secondary:hover { background: #f9fafb; color: var(--text); border-color: var(--border-hover); }
+    
+    .btn-danger { background: #fef2f2; color: var(--error); border-color: #fecaca; }
+    .btn-danger:hover { background: #fee2e2; }
+
+    .btn-group { display: flex; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+
+    /* ─── Creators List ─── */
+    .creator-entry {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 1rem;
+      align-items: end;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: #fafafa;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .btn-icon {
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: var(--radius); border: 1px solid var(--border); background: #fff;
+      color: var(--text-muted); cursor: pointer; transition: 0.15s;
+    }
+    .btn-icon:hover { border-color: #fca5a5; color: var(--error); background: #fef2f2; }
+
+    /* ─── Tags/Chips ─── */
+    .tags-input {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.5rem;
+      background: #fafafa; border: 1px solid var(--border); border-radius: var(--radius);
+      min-height: 48px; cursor: text; transition: 0.15s;
+    }
+    .tags-input:focus-within { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px var(--accent-bg); }
+    .tags-input input { flex: 1; min-width: 120px; border: none; background: transparent; padding: 0.25rem; outline: none; }
+    .tag {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--text); color: white;
+      padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.85rem;
+    }
+    .tag button { background: none; border: none; color: inherit; cursor: pointer; opacity: 0.7; }
+    .tag button:hover { opacity: 1; }
+
+    /* ─── Validation Panel ─── */
+    .validation-panel { margin-top: 1.5rem; padding: 1rem; border-radius: var(--radius); font-size: 0.9rem; }
+    .validation-panel.valid { background: #ecfdf5; border: 1px solid #6ee7b7; color: #065f46; }
+    .validation-panel.invalid { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+    .validation-panel ul { margin-top: 0.5rem; padding-left: 1.5rem; }
+
+    /* ─── Cards (Records) ─── */
+    .record-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      display: flex; flex-direction: column; gap: 0.75rem;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .record-card:hover { border-color: var(--border-hover); box-shadow: var(--shadow); }
+    .record-card h4 { display: flex; justify-content: space-between; align-items: center; color: var(--text); font-size: 1.1rem; margin-bottom: 0.25rem; }
+    .record-card .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; font-size: 0.85rem; color: var(--text-dim); }
+    .type-badge {
+      padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;
+      text-transform: uppercase; background: #f3f4f6; color: var(--text-dim); border: 1px solid var(--border);
+    }
+
+    /* ─── JSON Preview ─── */
+    .json-preview {
+      background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem; font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 0.85rem; color: #334155; overflow-y: auto; max-height: 500px;
+    }
+    .json-key { color: #0284c7; }
+    .json-string { color: #16a34a; }
+    .json-number { color: #ea580c; }
+
+    /* ─── Dashboard ─── */
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); }
+    .stat-card h3 { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1.25rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .metric-big { font-size: 3rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; line-height: 1; }
+    .chart-container { display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem; }
+    .chart-row { display: flex; flex-direction: column; gap: 0.35rem; }
+    .chart-label { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 500; }
+    .chart-label span.count { color: var(--text-muted); }
+    .chart-track { width: 100%; height: 6px; background: #f3f4f6; border-radius: 3px; overflow: hidden; }
+    .chart-fill { height: 100%; background: var(--text-dim); border-radius: 3px; width: 0%; transition: width 0.8s ease-out; }
+
+    /* ─── Empty state ─── */
+    .empty-state { text-align: center; padding: 4rem 2rem; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius); }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-muted); }
+    .empty-state h3 { color: var(--text); margin-bottom: 0.5rem; font-size: 1.1rem; }
+
+    /* ─── Toast/Notifications ─── */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem; padding: 1rem 1.5rem;
+      border-radius: var(--radius); font-size: 0.9rem; font-weight: 500;
+      background: var(--text); color: white; border: 1px solid var(--text);
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+      transform: translateY(100%); opacity: 0; pointer-events: none;
+      transition: all 0.3s ease-out; z-index: 200;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+    .toast.success { background: #059669; border-color: #047857; }
+    .toast.error { background: #dc2626; border-color: #b91c1c; }
+    .toast.warning { background: #d97706; border-color: #b45309; }
+
+    /* ─── Responsive ──────────────────────────────────── */
+    @media (max-width: 768px) {
+      .form-row, .creator-entry { grid-template-columns: 1fr; gap: 1rem; }
+      .header { flex-direction: column; padding: 1rem; gap: 1rem; }
+      .container { padding: 1rem; margin: 1rem auto; }
+      .form-section { padding: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo" onclick="switchTab('home')" style="cursor:pointer;">DMS Vault</div>
+      <span class="version" id="schema-version"></span>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-tab="home" onclick="switchTab('home')">Home</button>
+      <button class="tab" data-tab="dashboard" onclick="switchTab('dashboard')">Dashboard</button>
+      <button class="tab" data-tab="create" onclick="switchTab('create')">Create</button>
+      <button class="tab" data-tab="records" onclick="switchTab('records')">Records</button>
+      <button class="tab" data-tab="preview" onclick="switchTab('preview')">Preview</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ═══ HOME TAB ═══ -->
+    <div class="page active" id="page-home">
+      <div class="empty-state" style="border: none; background: transparent; padding-top: 2rem; padding-bottom: 2rem;">
+        <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--text); letter-spacing: -0.02em;">DMS Vault</h1>
+        <p style="font-size: 1.1rem; color: var(--text-dim); max-width: 600px; margin: 0 auto 3rem; line-height: 1.6;">
+          A rigorous, offline-first tool for documenting and preserving the digital heritage of the Dzaleka refugee community.
+        </p>
+        <div class="dashboard-grid" style="text-align: left;">
+          
+          <div class="stat-card" style="cursor:pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="switchTab('create')" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow)'" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 15px -3px rgba(0,0,0,0.1)'">
+            <h3 style="margin-bottom: 0.5rem; color: var(--text);">Start Archiving</h3>
+            <div style="font-size: 2rem; margin-bottom: 1rem; font-family: ui-monospace, Consolas, monospace; color: #0f172a;">[ + ]</div>
+            <p class="text-dim" style="font-size:0.9rem; text-transform:none; font-weight:normal; letter-spacing:normal;">Compile and serialize a new metadata artifact into JSON-LD.</p>
+          </div>
+          
+          <div class="stat-card" style="cursor:pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="switchTab('records')" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow)'" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 15px -3px rgba(0,0,0,0.1)'">
+            <h3 style="margin-bottom: 0.5rem; color: var(--text);">Browse Vault</h3>
+            <div style="font-size: 2rem; margin-bottom: 1rem; font-family: ui-monospace, Consolas, monospace; color: #0f172a;">[ ◎ ]</div>
+            <p class="text-dim" style="font-size:0.9rem; text-transform:none; font-weight:normal; letter-spacing:normal;">Examine or edit your local repository of stored records.</p>
+          </div>
+          
+          <div class="stat-card" style="cursor:pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="switchTab('dashboard')" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow)'" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 15px -3px rgba(0,0,0,0.1)'">
+            <h3 style="margin-bottom: 0.5rem; color: var(--text);">Analytics Dashboard</h3>
+            <div style="font-size: 2rem; margin-bottom: 1rem; font-family: ui-monospace, Consolas, monospace; color: #0f172a;">[ /// ]</div>
+            <p class="text-dim" style="font-size:0.9rem; text-transform:none; font-weight:normal; letter-spacing:normal;">Visualize corpus growth and structured vocabulary usage.</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CREATE TAB ═══ -->
+    <div class="page" id="page-create">
+      <form id="dms-form" autocomplete="off" onsubmit="return false;">
+
+        <!-- Required Fields -->
+        <section class="form-section">
+          <h3>Core Identity</h3>
+          <div class="form-row full">
+            <div class="form-group">
+              <label>Title <span class="required">*</span></label>
+              <span class="help-text">Name or title of the heritage item.</span>
+              <input type="text" id="f-title" placeholder="Name of the digital heritage item" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Heritage Type <span class="required">*</span></label>
+              <span class="help-text">Category of the heritage item.</span>
+              <select id="f-type" onchange="updateVisibility()"></select>
+            </div>
+            <div class="form-group">
+              <label>Language <span class="required">*</span></label>
+              <span class="help-text">Primary language using IETF codes (e.g., 'en', 'sw', 'fr', 'rw').</span>
+              <input type="text" id="f-language" value="en" placeholder="e.g., en, sw, fr, rw">
+            </div>
+          </div>
+          <div class="form-row full">
+            <div class="form-group">
+              <label>Narrative / Description <span class="required">*</span></label>
+              <span class="help-text">Narrative context or summary of the heritage item.</span>
+              <textarea id="f-description" placeholder="Provide context, story, or detailed description of the item..."></textarea>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" data-types="audio,video,photo,document,artwork">
+              <label>Digital Format (MIME)</label>
+              <span class="help-text">MIME type of the digital object.</span>
+              <input type="text" id="f-format" placeholder="e.g., audio/mpeg, image/jpeg">
+            </div>
+            <div class="form-group">
+              <label>Related Item IDs</label>
+              <span class="help-text">IDs of related DMS records.</span>
+              <input type="text" id="f-relation" placeholder="Comma-separated UUIDs">
+            </div>
+          </div>
+        </section>
+
+        <!-- Creators -->
+        <section class="form-section">
+          <h3>Authorship & Contributions</h3>
+          <div id="creators-list"></div>
+          <button type="button" class="btn btn-secondary" onclick="addCreator()" style="margin-top:0.5rem">
+            + Add Contributor
+          </button>
+        </section>
+
+        <!-- Subjects -->
+        <section class="form-section">
+          <h3>Thematic Tags</h3>
+          <div class="form-group">
+            <label>Tags (press Enter or comma after typing)</label>
+            <span class="help-text">Tags or keywords describing the item's content.</span>
+            <div class="tags-input" id="tags-container" onclick="document.getElementById('tags-field').focus()">
+              <input type="text" id="tags-field" placeholder="Add keywords like 'community'...">
+            </div>
+          </div>
+        </section>
+
+        <!-- Date & Location -->
+        <section class="form-section">
+          <h3>Space & Time</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Date Documented</label>
+              <span class="help-text">Date the record was created.</span>
+              <input type="date" id="f-date-created">
+            </div>
+            <div class="form-group">
+              <label>Event / Original Artifact Date</label>
+              <span class="help-text">Date of the event or original creation.</span>
+              <input type="date" id="f-date-event">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Location Name</label>
+              <span class="help-text">Human-readable place name (e.g., 'Dzaleka Refugee Camp').</span>
+              <input type="text" id="f-loc-name" value="Dzaleka Refugee Camp">
+            </div>
+            <div class="form-group">
+              <label>Area / Sector</label>
+              <span class="help-text">Specific area or section within the location.</span>
+              <input type="text" id="f-loc-area" placeholder="e.g., Community Space">
+            </div>
+          </div>
+          <div class="form-row" data-types="site,event,mural,photo,artwork">
+            <div class="form-group">
+              <label>Latitude Coordinates</label>
+              <span class="help-text">Latitude in decimal degrees.</span>
+              <input type="number" step="any" id="f-loc-lat" placeholder="e.g., -13.7833">
+            </div>
+            <div class="form-group">
+              <label>Longitude Coordinates</label>
+              <span class="help-text">Longitude in decimal degrees.</span>
+              <input type="number" step="any" id="f-loc-lon" placeholder="e.g., 33.9833">
+            </div>
+          </div>
+        </section>
+
+        <!-- Coverage -->
+        <section class="form-section" data-types="event,story,audio,video">
+          <h3>Temporal Coverage (Period)</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Start Date</label>
+              <span class="help-text">Start date of the period covered.</span>
+              <input type="date" id="f-cov-start">
+            </div>
+            <div class="form-group">
+              <label>End Date</label>
+              <span class="help-text">End date of the period covered.</span>
+              <input type="date" id="f-cov-end">
+            </div>
+          </div>
+          <div class="form-row full">
+            <div class="form-group">
+              <label>Period Description</label>
+              <span class="help-text">Human-readable description of the time period.</span>
+              <input type="text" id="f-cov-period" placeholder="e.g., Early settlement era, World Refugee Day 2024">
+            </div>
+          </div>
+        </section>
+
+        <!-- Rights -->
+        <section class="form-section">
+          <h3>Rights & Accessibility</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>License</label>
+              <span class="help-text">License identifier, preferably SPDX.</span>
+              <input type="text" id="f-license" value="CC-BY-4.0">
+            </div>
+            <div class="form-group">
+              <label>Access Level</label>
+              <span class="help-text">Who can access this item.</span>
+              <select id="f-access"></select>
+            </div>
+          </div>
+          <div class="form-row full" data-types="audio,video,photo,artwork,mural,document">
+            <div class="form-group">
+              <label>Rights Holder</label>
+              <span class="help-text">Name of the rights holder or copyright owner.</span>
+              <input type="text" id="f-rights-holder" placeholder="Name of copyright or heritage rights owner">
+            </div>
+          </div>
+        </section>
+
+        <!-- Source -->
+        <section class="form-section" data-types="audio,video,photo,document,artwork">
+          <h3>Origin & Source Archive</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Source Collection</label>
+              <span class="help-text">Named collection this item belongs to.</span>
+              <input type="text" id="f-src-collection" placeholder="e.g., Oral Histories 2024">
+            </div>
+            <div class="form-group">
+              <label>Original Format</label>
+              <span class="help-text">Original format of the item before digitization.</span>
+              <input type="text" id="f-src-format" placeholder="e.g., handwritten notebook, cassette tape">
+            </div>
+          </div>
+          <div class="form-row full">
+            <div class="form-group">
+              <label>Source Contributor</label>
+              <span class="help-text">Person or organization that contributed this item.</span>
+              <input type="text" id="f-src-contributor" placeholder="Person or organization that provided original material">
+            </div>
+          </div>
+        </section>
+
+        <!-- Actions -->
+        <div class="btn-group">
+          <button type="button" class="btn btn-success" id="btn-save" onclick="saveRecord()">
+           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+           <span id="txt-save">Commit Record</span>
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="validateRecord()">
+           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+           Validate Schema
+          </button>
+          <button type="button" class="btn btn-danger" style="margin-left: auto;" onclick="resetForm()">Clear Form</button>
+        </div>
+
+        <div id="validation-result"></div>
+      </form>
+    </div>
+
+    <!-- ═══ RECORDS TAB ═══ -->
+    <div class="page" id="page-records">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h2>Collection Archive</h2>
+        <button class="btn btn-secondary" onclick="loadRecords()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          Sync
+        </button>
+      </div>
+      <div id="records-list">
+        <div class="empty-state">
+          <div class="icon">
+            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+          </div>
+          <h3>Vault is Empty</h3>
+          <p class="text-dim">Create your first heritage record to populate the archive.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PREVIEW TAB ═══ -->
+    <div class="page" id="page-preview">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h2>JSON Object Preview</h2>
+        <div style="display:flex; gap:0.75rem;">
+          <button class="btn btn-secondary" onclick="previewJSONLD()">
+            Generate JSON-LD
+          </button>
+          <button class="btn btn-primary" onclick="copyJSON()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            Copy Data
+          </button>
+        </div>
+      </div>
+      <pre class="json-preview" id="json-output">Construct a record in the Create tab to view the live JSON output.</pre>
+    </div>
+    <!-- ═══ DASHBOARD TAB ═══ -->
+    <div class="page" id="page-dashboard">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>Archive Analytics</h2>
+        <button class="btn btn-secondary" onclick="loadRecords()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          Refresh Data
+        </button>
+      </div>
+      
+      <div class="dashboard-grid">
+        <div class="stat-card">
+          <h3>Total Artifacts</h3>
+          <div class="metric-big" id="dash-total">0</div>
+          <p class="text-dim" style="font-size:0.9rem;">Safely stored in the local vault.</p>
+        </div>
+        
+        <div class="stat-card">
+          <h3>Heritage Types</h3>
+          <div class="chart-container" id="dash-types">
+            <p class="text-dim">No data available.</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <h3>Language Diversity</h3>
+          <div class="chart-container" id="dash-languages">
+            <p class="text-dim">No data available.</p>
+          </div>
+        </div>
+        
+        <div class="stat-card" style="grid-column: 1 / -1;">
+          <h3>Top Subjects & Tags</h3>
+          <div class="tags-input" id="dash-tags" style="border:none; background:transparent; padding:0; justify-content:flex-start;">
+            <p class="text-dim">No tags available.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let schema = {};
+    let tags = [];
+    let currentMode = 'create';
+    let currentRecordId = null;
+
+    // ─── Init ─────────────────────────────────────────
+    async function init() {
+      try {
+        const res = await fetch('/api/schema');
+        schema = await res.json();
+        document.getElementById('schema-version').textContent = 'v' + schema.version;
+
+        const typeSelect = document.getElementById('f-type');
+        schema.types.forEach(t => {
+          const opt = document.createElement('option');
+          opt.value = t; opt.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+          typeSelect.appendChild(opt);
+        });
+
+        const accessSelect = document.getElementById('f-access');
+        schema.access_levels.forEach(a => {
+          const opt = document.createElement('option');
+          opt.value = a; opt.textContent = a.charAt(0).toUpperCase() + a.slice(1);
+          accessSelect.appendChild(opt);
+        });
+
+        document.getElementById('f-date-created').value = new Date().toISOString().split('T')[0];
+        addCreator();
+        updateVisibility();
+      } catch (e) {
+        showToast('Failed to connect to DMS core.', 'error');
+      }
+    }
+
+    // ─── Tabs ─────────────────────────────────────────
+    function switchTab(name) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(p => {
+        p.classList.remove('active');
+        p.style.animation = 'none';
+        p.offsetHeight; /* trigger reflow */
+        p.style.animation = null; 
+      });
+      document.querySelector(`.tab[data-tab="${name}"]`).classList.add('active');
+      document.getElementById('page-' + name).classList.add('active');
+
+      if (name === 'records' || name === 'dashboard') loadRecords();
+      if (name === 'preview') previewJSON();
+    }
+
+    // ─── Creators ─────────────────────────────────────
+    function addCreator() {
+      const list = document.getElementById('creators-list');
+      const div = document.createElement('div');
+      div.className = 'creator-entry';
+
+      let roleOptions = '<option value="">Select Primary Role…</option>';
+      if (schema.roles) {
+        schema.roles.forEach(r => {
+          roleOptions += `<option value="${r}">${r.charAt(0).toUpperCase() + r.slice(1)}</option>`;
+        });
+      }
+
+      div.innerHTML = `
+        <div class="form-group">
+          <label>Identified Name</label>
+          <span class="help-text">Full name of the creator.</span>
+          <input type="text" class="creator-name" placeholder="E.g. John Doe">
+        </div>
+        <div class="form-group">
+          <label>Role / Function</label>
+          <span class="help-text">Role of the creator in producing this item.</span>
+          <select class="creator-role">${roleOptions}</select>
+        </div>
+        <div class="form-group">
+          <label>Affiliated Group</label>
+          <span class="help-text">Organization or community the creator is affiliated with.</span>
+          <input type="text" class="creator-affil" placeholder="Organization">
+        </div>
+        <button type="button" class="btn-icon" onclick="this.parentElement.remove()" title="Remove">✕</button>
+      `;
+      list.appendChild(div);
+    }
+
+    // ─── Tags ─────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      const field = document.getElementById('tags-field');
+      field.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ',') {
+          e.preventDefault();
+          const val = field.value.trim().replace(/,$/, '');
+          if (val && !tags.includes(val)) {
+            tags.push(val);
+            renderTags();
+          }
+          field.value = '';
+        }
+        if (e.key === 'Backspace' && !field.value && tags.length) {
+          tags.pop();
+          renderTags();
+        }
+      });
+    });
+
+    function renderTags() {
+      const container = document.getElementById('tags-container');
+      container.querySelectorAll('.tag').forEach(t => t.remove());
+      const input = document.getElementById('tags-field');
+      tags.forEach((tag, i) => {
+        const span = document.createElement('span');
+        span.className = 'tag';
+        span.innerHTML = `${tag} <button type="button" onclick="removeTag(${i})">✕</button>`;
+        container.insertBefore(span, input);
+      });
+    }
+
+    function removeTag(i) {
+      tags.splice(i, 1);
+      renderTags();
+    }
+
+    // ─── Build Record ─────────────────────────────────
+    async function buildRecord() {
+      let recId = currentRecordId;
+      if (!recId) {
+        const idRes = await fetch('/api/new-id');
+        const idData = await idRes.json();
+        recId = idData.id;
+      }
+      
+      const record = {
+        id: recId,
+        title: document.getElementById('f-title').value.trim(),
+        type: document.getElementById('f-type').value,
+        description: document.getElementById('f-description').value.trim(),
+        language: document.getElementById('f-language').value.trim().toLowerCase(),
+      };
+
+      const fmt = document.getElementById('f-format').value.trim();
+      if (fmt) record.format = fmt;
+
+      const rel = document.getElementById('f-relation').value.trim();
+      if (rel) {
+        record.relation = rel.split(',').map(s => s.trim()).filter(s => s);
+      }
+
+      const entries = document.querySelectorAll('.creator-entry');
+      const creators = [];
+      entries.forEach(entry => {
+        const name = entry.querySelector('.creator-name').value.trim();
+        if (name) {
+          const c = { name };
+          const role = entry.querySelector('.creator-role').value;
+          const affil = entry.querySelector('.creator-affil').value.trim();
+          if (role) c.role = role;
+          if (affil) c.affiliation = affil;
+          creators.push(c);
+        }
+      });
+      if (creators.length) record.creator = creators;
+
+      const dateCreated = document.getElementById('f-date-created').value;
+      const dateEvent = document.getElementById('f-date-event').value;
+      if (dateCreated || dateEvent) {
+        record.date = {};
+        if (dateCreated) record.date.created = dateCreated;
+        if (dateEvent) record.date.event_date = dateEvent;
+      }
+
+      if (tags.length) record.subject = [...tags];
+
+      const locName = document.getElementById('f-loc-name').value.trim();
+      const locArea = document.getElementById('f-loc-area').value.trim();
+      const locLat = document.getElementById('f-loc-lat').value;
+      const locLon = document.getElementById('f-loc-lon').value;
+      
+      if (locName || locArea || locLat || locLon) {
+        record.location = {};
+        if (locName) record.location.name = locName;
+        if (locArea) record.location.area = locArea;
+        if (locLat) record.location.latitude = parseFloat(locLat);
+        if (locLon) record.location.longitude = parseFloat(locLon);
+      }
+
+      const license = document.getElementById('f-license').value.trim();
+      const access = document.getElementById('f-access').value;
+      const holder = document.getElementById('f-rights-holder').value.trim();
+      if (license || access || holder) {
+        record.rights = {};
+        if (license) record.rights.license = license;
+        if (access) record.rights.access_level = access;
+        if (holder) record.rights.holder = holder;
+      }
+
+      const srcCol = document.getElementById('f-src-collection').value.trim();
+      const srcFmt = document.getElementById('f-src-format').value.trim();
+      const srcCon = document.getElementById('f-src-contributor').value.trim();
+      if (srcCol || srcFmt || srcCon) {
+        record.source = {};
+        if (srcCol) record.source.collection = srcCol;
+        if (srcFmt) record.source.original_format = srcFmt;
+        if (srcCon) record.source.contributor = srcCon;
+      }
+
+      const covStart = document.getElementById('f-cov-start').value;
+      const covEnd = document.getElementById('f-cov-end').value;
+      const covPeriod = document.getElementById('f-cov-period').value.trim();
+      if (covStart || covEnd || covPeriod) {
+        record.coverage = {};
+        if (covStart) record.coverage.start_date = covStart;
+        if (covEnd) record.coverage.end_date = covEnd;
+        if (covPeriod) record.coverage.period = covPeriod;
+      }
+
+      record.schema_version = schema.version;
+      return record;
+    }
+
+    // ─── Utilities ────────────────────────────────────
+    
+    // Simple syntax highlighter for JSON
+    function syntaxHighlight(json) {
+      if (typeof json != 'string') { json = JSON.stringify(json, undefined, 2); }
+      json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+        var cls = 'json-number';
+        if (/^"/.test(match)) {
+          if (/:$/.test(match)) { cls = 'json-key'; } else { cls = 'json-string'; }
+        } else if (/true|false/.test(match)) { cls = 'json-string'; } else if (/null/.test(match)) { cls = 'json-string'; }
+        return '<span class="' + cls + '">' + match + '</span>';
+      });
+    }
+
+    async function validateRecord() {
+      const record = await buildRecord();
+      try {
+        const res = await fetch('/api/validate', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(record),
+        });
+        const data = await res.json();
+        const panel = document.getElementById('validation-result');
+
+        if (data.valid) {
+          let html = '<div class="validation-panel valid"><strong>✓ Schema Compliant</strong>';
+          if (data.warnings && data.warnings.length) {
+            html += '<ul>' + data.warnings.map(w => `<li class="warning-item">⚠ ${w}</li>`).join('') + '</ul>';
+          }
+          html += '</div>';
+          panel.innerHTML = html;
+          showToast('Schema validated successfully', 'success');
+        } else {
+          let html = '<div class="validation-panel invalid"><strong>✗ Non-Compliant Data</strong><ul>';
+          html += data.errors.map(e => `<li>${e.field}: ${e.message}</li>`).join('') + '</ul></div>';
+          panel.innerHTML = html;
+          showToast('Validation failed', 'error');
+        }
+      } catch (e) { showToast('Network Error', 'error'); }
+    }
+
+    async function saveRecord() {
+      const record = await buildRecord();
+      try {
+        const res = await fetch('/api/save', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(record),
+        });
+        const data = await res.json();
+        if (data.saved) {
+          showToast(`Artifact Archived: ${data.file}`, 'success');
+          document.getElementById('validation-result').innerHTML = ''; // Clear validated state
+        } else {
+          showToast(data.error || 'Failed to archive', 'error');
+          if (data.errors) {
+            const panel = document.getElementById('validation-result');
+            let html = '<div class="validation-panel invalid">✗ Schema Errors prevent saving<ul>';
+            html += data.errors.map(e => `<li>${e.field}: ${e.message}</li>`).join('') + '</ul></div>';
+            panel.innerHTML = html;
+          }
+        }
+      } catch (e) {}
+    }
+
+    async function previewJSON() {
+      const record = await buildRecord();
+      document.getElementById('json-output').innerHTML = syntaxHighlight(record);
+    }
+    
+    async function previewJSONLD() {
+      const record = await buildRecord();
+      try {
+        const res = await fetch('/api/export-jsonld', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(record),
+        });
+        const data = await res.json();
+        document.getElementById('json-output').innerHTML = syntaxHighlight(data);
+        showToast('Generated Linked Data context', 'success');
+      } catch (e) {}
+    }
+
+    function copyJSON() {
+      const text = document.getElementById('json-output').innerText;
+      navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard', 'success'));
+    }
+
+    async function loadRecords() {
+      try {
+        const res = await fetch('/api/records');
+        const records = await res.json();
+        const list = document.getElementById('records-list');
+        if (!records.length) {
+          list.innerHTML = `
+            <div class="empty-state">
+              <div class="icon">
+                <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+              </div>
+              <h3>Vault is Empty</h3>
+              <p class="text-dim">Create your first heritage record to populate the archive.</p>
+            </div>`;
+          return;
+        }
+        list.innerHTML = records.map(r => {
+          const creators = (r.creator || []).map(c => c.name).join(', ');
+          const date = r.date && r.date.created ? r.date.created : '—';
+          return `
+            <div class="record-card">
+              <div onclick='showRecordJSON(${JSON.stringify(JSON.stringify(r))})' style="flex:1">
+                <h4>
+                  ${r.title || 'Untitled Artifact'}
+                  <span class="type-badge">${r.type || 'Undefined'}</span>
+                </h4>
+                <div class="meta">
+                  <span>Date: ${date}</span>
+                  <span style="text-transform:uppercase;">Lang: ${r.language || '—'}</span>
+                  ${creators ? `<span>Creators: ${creators}</span>` : ''}
+                </div>
+              </div>
+              <div style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px dashed var(--glass-border); text-align:right;">
+                <button class="btn btn-secondary" style="padding:0.4rem 1rem; font-size:0.8rem;" onclick='event.stopPropagation(); editRecord(${JSON.stringify(JSON.stringify(r))})'>Edit</button>
+              </div>
+            </div>`;
+        }).join('');
+        
+        renderDashboard(records);
+
+      } catch (e) {}
+    }
+
+    function renderDashboard(records) {
+      document.getElementById('dash-total').innerText = records.length;
+      
+      if (records.length === 0) return;
+
+      const types = {};
+      const languages = {};
+      const tagsMap = {};
+
+      records.forEach(r => {
+        const t = r.type || 'Undefined';
+        types[t] = (types[t] || 0) + 1;
+        
+        let l = r.language || 'Unknown';
+        l = l.toUpperCase();
+        languages[l] = (languages[l] || 0) + 1;
+        
+        if (r.subject && Array.isArray(r.subject)) {
+          r.subject.forEach(tag => {
+            tagsMap[tag] = (tagsMap[tag] || 0) + 1;
+          });
+        }
+      });
+
+      const renderChart = (dataObj, containerId) => {
+        const sorted = Object.entries(dataObj).sort((a,b) => b[1] - a[1]).slice(0, 5);
+        if (sorted.length === 0) return;
+        const max = sorted[0][1];
+        
+        const html = sorted.map(([label, count]) => {
+          return `
+            <div class="chart-row">
+              <div class="chart-label">
+                ${label.charAt(0).toUpperCase() + label.slice(1)}
+                <span class="count">${count}</span>
+              </div>
+              <div class="chart-track">
+                <div class="chart-fill" style="width: 0%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        const el = document.getElementById(containerId);
+        el.innerHTML = html;
+        
+        // Trigger animations immediately after reflow
+        setTimeout(() => {
+          const rows = el.querySelectorAll('.chart-row');
+          sorted.forEach(([label, count], i) => {
+            const pct = Math.round((count / max) * 100);
+            if (rows[i]) rows[i].querySelector('.chart-fill').style.width = pct + '%';
+          });
+        }, 50);
+      };
+
+      renderChart(types, 'dash-types');
+      renderChart(languages, 'dash-languages');
+
+      const sortedTags = Object.entries(tagsMap).sort((a,b) => b[1] - a[1]).slice(0, 20);
+      if (sortedTags.length > 0) {
+        const tagsHtml = sortedTags.map(([tag, count]) => {
+          return `<span class="tag" style="font-size: 0.95rem; padding: 0.4rem 1rem;">${tag} <span style="opacity:0.5; font-size:0.8rem; margin-left:0.3rem;">${count}</span></span>`;
+        }).join('');
+        document.getElementById('dash-tags').innerHTML = tagsHtml;
+      }
+    }
+
+    function showRecordJSON(str) {
+      document.getElementById('json-output').innerHTML = syntaxHighlight(JSON.parse(str));
+      switchTab('preview');
+    }
+
+    function resetForm() {
+      currentMode = 'create';
+      currentRecordId = null;
+      document.getElementById('txt-save').innerText = 'Commit Record';
+      document.querySelector('.tab[data-tab="create"]').innerText = 'Create';
+
+      document.getElementById('dms-form').reset();
+      document.getElementById('f-date-created').value = new Date().toISOString().split('T')[0];
+      document.getElementById('f-loc-name').value = 'Dzaleka Refugee Camp';
+      document.getElementById('f-license').value = 'CC-BY-4.0';
+      tags = []; renderTags();
+      document.getElementById('creators-list').innerHTML = ''; addCreator();
+      document.getElementById('validation-result').innerHTML = '';
+      updateVisibility();
+      showToast('Workspace initialized', 'success');
+    }
+
+    function editRecord(str) {
+      const r = JSON.parse(str);
+      currentMode = 'edit';
+      currentRecordId = r.id;
+      document.getElementById('txt-save').innerText = 'Update Record';
+      document.querySelector('.tab[data-tab="create"]').innerText = 'Edit Record';
+      switchTab('create');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      document.getElementById('f-title').value = r.title || '';
+      document.getElementById('f-type').value = r.type || 'story';
+      document.getElementById('f-language').value = r.language || '';
+      document.getElementById('f-description').value = r.description || '';
+      document.getElementById('f-format').value = r.format || '';
+      document.getElementById('f-relation').value = r.relation ? r.relation.join(', ') : '';
+
+      if (r.date) {
+        document.getElementById('f-date-created').value = r.date.created || '';
+        document.getElementById('f-date-event').value = r.date.event_date || '';
+      } else {
+        document.getElementById('f-date-created').value = '';
+        document.getElementById('f-date-event').value = '';
+      }
+
+      if (r.location) {
+        document.getElementById('f-loc-name').value = r.location.name || '';
+        document.getElementById('f-loc-area').value = r.location.area || '';
+        document.getElementById('f-loc-lat').value = r.location.latitude || '';
+        document.getElementById('f-loc-lon').value = r.location.longitude || '';
+      } else {
+        document.getElementById('f-loc-name').value = '';
+        document.getElementById('f-loc-area').value = '';
+        document.getElementById('f-loc-lat').value = '';
+        document.getElementById('f-loc-lon').value = '';
+      }
+
+      if (r.rights) {
+        document.getElementById('f-license').value = r.rights.license || '';
+        document.getElementById('f-access').value = r.rights.access_level || 'public';
+        document.getElementById('f-rights-holder').value = r.rights.holder || '';
+      } else {
+        document.getElementById('f-license').value = '';
+        document.getElementById('f-access').value = 'public';
+        document.getElementById('f-rights-holder').value = '';
+      }
+
+      if (r.source) {
+        document.getElementById('f-src-collection').value = r.source.collection || '';
+        document.getElementById('f-src-format').value = r.source.original_format || '';
+        document.getElementById('f-src-contributor').value = r.source.contributor || '';
+      } else {
+        document.getElementById('f-src-collection').value = '';
+        document.getElementById('f-src-format').value = '';
+        document.getElementById('f-src-contributor').value = '';
+      }
+
+      if (r.coverage) {
+        document.getElementById('f-cov-start').value = r.coverage.start_date || '';
+        document.getElementById('f-cov-end').value = r.coverage.end_date || '';
+        document.getElementById('f-cov-period').value = r.coverage.period || '';
+      } else {
+        document.getElementById('f-cov-start').value = '';
+        document.getElementById('f-cov-end').value = '';
+        document.getElementById('f-cov-period').value = '';
+      }
+
+      tags = r.subject ? [...r.subject] : [];
+      renderTags();
+
+      const creList = document.getElementById('creators-list');
+      creList.innerHTML = '';
+      if (r.creator && r.creator.length > 0) {
+        r.creator.forEach(c => {
+          addCreator();
+          const entries = document.querySelectorAll('.creator-entry');
+          const last = entries[entries.length - 1];
+          last.querySelector('.creator-name').value = c.name || '';
+          if (c.role) last.querySelector('.creator-role').value = c.role;
+          last.querySelector('.creator-affil').value = c.affiliation || '';
+        });
+      } else {
+        addCreator();
+      }
+
+      document.getElementById('validation-result').innerHTML = '';
+      switchTab('create');
+      updateVisibility();
+      showToast('Loaded record for editing', 'success');
+    }
+
+    function updateVisibility() {
+      const activeType = document.getElementById('f-type').value;
+      if (!activeType) return;
+      
+      document.querySelectorAll('[data-types]').forEach(el => {
+        const types = el.getAttribute('data-types').split(',');
+        if (types.includes(activeType)) {
+          el.style.display = '';
+        } else {
+          el.style.display = 'none';
+        }
+      });
+    }
+
+    function showToast(msg, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.innerHTML = type === 'success' ? '✓ ' + msg : '✗ ' + msg;
+      toast.className = `toast ${type} show`;
+      setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+
+    init();
+  </script>
+</body>
+</html>

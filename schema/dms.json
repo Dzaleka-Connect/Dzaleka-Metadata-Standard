@@ -1,0 +1,263 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Dzaleka-Connect/Dzaleka-Metadata-Standard/schema/dms.json",
+  "title": "Dzaleka Metadata Standard (DMS) Record",
+  "description": "A metadata schema for describing heritage items from Dzaleka refugee camp. Based on Dublin Core with community-specific extensions.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for the record (UUID v4). Maps to dc:identifier."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "Name or title of the heritage item. Maps to dc:title."
+    },
+    "creator": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Creator"
+      },
+      "minItems": 1,
+      "description": "Person(s) or organization(s) who created the item. Maps to dc:creator."
+    },
+    "date": {
+      "$ref": "#/$defs/DateInfo",
+      "description": "Date information associated with the item. Maps to dc:date / dcterms:created / dcterms:modified."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Narrative context or summary of the heritage item. Maps to dc:description."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "story",
+        "photo",
+        "document",
+        "audio",
+        "video",
+        "event",
+        "map",
+        "artwork",
+        "site",
+        "poem"
+      ],
+      "description": "Category of the heritage item. Maps to dc:type."
+    },
+    "subject": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "description": "Tags or keywords describing the item's content. Maps to dc:subject."
+    },
+    "language": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(-[A-Z]{2,4})?$",
+      "description": "Primary language of the content using IETF BCP 47 codes (e.g., 'en', 'sw', 'fr', 'rw'). Maps to dc:language."
+    },
+    "location": {
+      "$ref": "#/$defs/Location",
+      "description": "Geographic information associated with the item. Maps to dcterms:spatial."
+    },
+    "rights": {
+      "$ref": "#/$defs/Rights",
+      "description": "Licensing, access, and intellectual property information. Maps to dc:rights."
+    },
+    "source": {
+      "$ref": "#/$defs/Source",
+      "description": "Information about the origin, contributor, or collection. Maps to dc:source."
+    },
+    "format": {
+      "type": "string",
+      "pattern": "^[a-z]+/[a-z0-9.+-]+$",
+      "description": "MIME type of the digital object (e.g., 'image/jpeg', 'audio/mpeg'). Maps to dc:format."
+    },
+    "relation": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "uniqueItems": true,
+      "description": "IDs of related DMS records. Maps to dc:relation."
+    },
+    "coverage": {
+      "$ref": "#/$defs/Coverage",
+      "description": "Temporal extent or scope of the item's content. Maps to dc:coverage."
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Version of the DMS schema this record conforms to."
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "type",
+    "description",
+    "language"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "Creator": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Full name of the creator."
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "author",
+            "photographer",
+            "interviewer",
+            "interviewee",
+            "narrator",
+            "artist",
+            "muralist",
+            "sculptor",
+            "poet",
+            "curator",
+            "recorder",
+            "editor",
+            "translator",
+            "organizer",
+            "contributor"
+          ],
+          "description": "Role of the creator in producing this item."
+        },
+        "affiliation": {
+          "type": "string",
+          "description": "Organization or community the creator is affiliated with."
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "DateInfo": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "string",
+          "format": "date",
+          "description": "Date the record was created (ISO 8601, e.g., '2024-06-20')."
+        },
+        "modified": {
+          "type": "string",
+          "format": "date",
+          "description": "Date the record was last modified."
+        },
+        "event_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of the event or original creation of the heritage item."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Location": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable place name (e.g., 'Dzaleka Refugee Camp')."
+        },
+        "area": {
+          "type": "string",
+          "description": "Specific area or section within the location (e.g., 'Section A', 'Market Area', 'Community Center')."
+        },
+        "latitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90,
+          "description": "Latitude in decimal degrees."
+        },
+        "longitude": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180,
+          "description": "Longitude in decimal degrees."
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "Rights": {
+      "type": "object",
+      "properties": {
+        "license": {
+          "type": "string",
+          "description": "License identifier, preferably SPDX (e.g., 'CC-BY-4.0', 'CC-BY-NC-4.0')."
+        },
+        "access_level": {
+          "type": "string",
+          "enum": [
+            "public",
+            "restricted",
+            "community-only"
+          ],
+          "description": "Who can access this item. 'public' = open to all, 'restricted' = requires permission, 'community-only' = Dzaleka community members."
+        },
+        "holder": {
+          "type": "string",
+          "description": "Name of the rights holder or copyright owner."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Source": {
+      "type": "object",
+      "properties": {
+        "contributor": {
+          "type": "string",
+          "description": "Person or organization that contributed this item to the archive."
+        },
+        "collection": {
+          "type": "string",
+          "description": "Named collection this item belongs to (e.g., 'Oral Histories 2024', 'Camp Maps')."
+        },
+        "original_format": {
+          "type": "string",
+          "description": "Original format of the item before digitization (e.g., 'handwritten notebook', 'cassette tape')."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Coverage": {
+      "type": "object",
+      "properties": {
+        "start_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Start date of the period covered by the item."
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date",
+          "description": "End date of the period covered by the item."
+        },
+        "period": {
+          "type": "string",
+          "description": "Human-readable description of the time period (e.g., 'Early settlement era', '2020-2024')."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

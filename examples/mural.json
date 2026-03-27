@@ -1,0 +1,40 @@
+{
+  "id": "a2b3c4d5-e6f7-8a9b-0c1d-2e3f4a5b6c7d",
+  "title": "Child Early Marriage Awareness Mural",
+  "type": "artwork",
+  "description": "A large-scale public mural at Dzaleka Refugee Camp raising awareness about child early marriage. The mural uses vivid imagery and visual storytelling to communicate the harmful effects of early marriage on children's education, health, and futures. Created as part of the Dzaleka Art Project, it serves as both a community advocacy tool and a striking example of public art as social commentary in the camp.",
+  "language": "en",
+  "creator": [
+    {
+      "name": "Dzaleka Art Project",
+      "role": "artist",
+      "affiliation": "Dzaleka Art Project"
+    }
+  ],
+  "date": {
+    "created": "2024-08-01"
+  },
+  "subject": [
+    "mural",
+    "public art",
+    "child marriage",
+    "awareness",
+    "advocacy",
+    "visual culture",
+    "art project"
+  ],
+  "location": {
+    "name": "Dzaleka Refugee Camp"
+  },
+  "format": "image/jpeg",
+  "rights": {
+    "license": "CC-BY-4.0",
+    "access_level": "public",
+    "holder": "Dzaleka Art Project"
+  },
+  "source": {
+    "contributor": "Dzaleka Online Services",
+    "collection": "Dzaleka Public Art Catalogue"
+  },
+  "schema_version": "1.0.0"
+}

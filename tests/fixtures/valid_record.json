@@ -1,0 +1,39 @@
+{
+  "id": "b3e7c8a1-4d5f-6e7a-8b9c-0d1e2f3a4b5c",
+  "title": "Journey to Dzaleka: A Story of Hope",
+  "type": "story",
+  "description": "An oral history account of a Congolese family's journey from Bukavu to Dzaleka Refugee Camp in 2015.",
+  "language": "en",
+  "creator": [
+    {
+      "name": "Marie Consolée",
+      "role": "narrator"
+    }
+  ],
+  "date": {
+    "created": "2024-03-15",
+    "event_date": "2015-08-22"
+  },
+  "subject": [
+    "oral history",
+    "displacement",
+    "Congo"
+  ],
+  "location": {
+    "name": "Dzaleka Refugee Camp",
+    "area": "Community Center",
+    "latitude": -13.7833,
+    "longitude": 33.9833
+  },
+  "format": "text/plain",
+  "rights": {
+    "license": "CC-BY-NC-4.0",
+    "access_level": "public",
+    "holder": "Marie Consolée"
+  },
+  "source": {
+    "contributor": "Dzaleka Digital Heritage Project",
+    "collection": "Oral Histories 2024"
+  },
+  "schema_version": "1.0.0"
+}

@@ -1,0 +1,196 @@
+{
+  "@context": {
+    "@version": 1.1,
+
+    "dms": "https://github.com/Dzaleka-Connect/Dzaleka-Metadata-Standard/schema#",
+    "dc": "http://purl.org/dc/elements/1.1/",
+    "dcterms": "http://purl.org/dc/terms/",
+    "schema": "https://schema.org/",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+    "bibo": "http://purl.org/ontology/bibo/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "geo": "http://www.w3.org/2003/01/geo/wgs84_pos#",
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+
+    "HeritageRecord": "dms:HeritageRecord",
+
+    "id": {
+      "@id": "dc:identifier",
+      "@type": "xsd:string"
+    },
+    "title": {
+      "@id": "dc:title",
+      "@type": "xsd:string"
+    },
+    "description": {
+      "@id": "dc:description",
+      "@type": "xsd:string"
+    },
+    "type": {
+      "@id": "dc:type",
+      "@type": "xsd:string"
+    },
+    "language": {
+      "@id": "dc:language",
+      "@type": "xsd:language"
+    },
+
+    "creator": {
+      "@id": "dc:creator",
+      "@type": "@id",
+      "@container": "@list"
+    },
+    "name": {
+      "@id": "foaf:name",
+      "@type": "xsd:string"
+    },
+    "role": {
+      "@id": "dms:creatorRole",
+      "@type": "xsd:string"
+    },
+    "affiliation": {
+      "@id": "schema:affiliation",
+      "@type": "xsd:string"
+    },
+
+    "date": {
+      "@id": "dc:date",
+      "@type": "@id"
+    },
+    "created": {
+      "@id": "dcterms:created",
+      "@type": "xsd:date"
+    },
+    "modified": {
+      "@id": "dcterms:modified",
+      "@type": "xsd:date"
+    },
+    "event_date": {
+      "@id": "dcterms:date",
+      "@type": "xsd:date"
+    },
+
+    "subject": {
+      "@id": "dc:subject",
+      "@type": "xsd:string",
+      "@container": "@set"
+    },
+
+    "location": {
+      "@id": "dcterms:spatial",
+      "@type": "@id"
+    },
+    "area": {
+      "@id": "dms:campArea",
+      "@type": "xsd:string"
+    },
+    "latitude": {
+      "@id": "geo:lat",
+      "@type": "xsd:decimal"
+    },
+    "longitude": {
+      "@id": "geo:long",
+      "@type": "xsd:decimal"
+    },
+
+    "rights": {
+      "@id": "dc:rights",
+      "@type": "@id"
+    },
+    "license": {
+      "@id": "dcterms:license",
+      "@type": "@id"
+    },
+    "access_level": {
+      "@id": "dms:accessLevel",
+      "@type": "xsd:string"
+    },
+    "holder": {
+      "@id": "dcterms:rightsHolder",
+      "@type": "xsd:string"
+    },
+
+    "source": {
+      "@id": "dc:source",
+      "@type": "@id"
+    },
+    "contributor": {
+      "@id": "dcterms:contributor",
+      "@type": "xsd:string"
+    },
+    "collection": {
+      "@id": "bibo:Collection",
+      "@type": "xsd:string"
+    },
+    "original_format": {
+      "@id": "dms:originalFormat",
+      "@type": "xsd:string"
+    },
+
+    "format": {
+      "@id": "dc:format",
+      "@type": "dcterms:MediaType"
+    },
+
+    "relation": {
+      "@id": "dc:relation",
+      "@type": "@id",
+      "@container": "@set"
+    },
+
+    "coverage": {
+      "@id": "dc:coverage",
+      "@type": "@id"
+    },
+    "start_date": {
+      "@id": "schema:startDate",
+      "@type": "xsd:date"
+    },
+    "end_date": {
+      "@id": "schema:endDate",
+      "@type": "xsd:date"
+    },
+    "period": {
+      "@id": "dcterms:temporal",
+      "@type": "xsd:string"
+    },
+
+    "schema_version": {
+      "@id": "schema:schemaVersion",
+      "@type": "xsd:string"
+    }
+  },
+
+  "@graph": {
+    "@type": "dms:HeritageRecord",
+    "dms:typeMapping": {
+      "story":    {"@id": "schema:Article",      "foaf:Document": true, "bibo:Document": true},
+      "photo":    {"@id": "schema:Photograph",    "foaf:Image": true},
+      "document": {"@id": "schema:DigitalDocument","foaf:Document": true, "bibo:Document": true},
+      "audio":    {"@id": "schema:AudioObject",   "bibo:AudioDocument": true},
+      "video":    {"@id": "schema:VideoObject",   "bibo:AudioVisualDocument": true},
+      "event":    {"@id": "schema:Event",         "bibo:Event": true},
+      "map":      {"@id": "schema:Map",           "foaf:Document": true},
+      "artwork":  {"@id": "schema:VisualArtwork",  "foaf:Image": true},
+      "site":     {"@id": "schema:Place",          "schema:LandmarksOrHistoricalBuildings": true},
+      "poem":     {"@id": "schema:CreativeWork",   "bibo:Document": true}
+    },
+    "dms:roleMapping": {
+      "author":       {"@id": "bibo:authorList",   "foaf:maker": true},
+      "photographer": {"@id": "schema:photographer"},
+      "interviewer":  {"@id": "bibo:interviewer"},
+      "interviewee":  {"@id": "bibo:interviewee"},
+      "narrator":     {"@id": "dms:narrator"},
+      "artist":       {"@id": "schema:artist"},
+      "muralist":     {"@id": "dms:muralist"},
+      "sculptor":     {"@id": "dms:sculptor"},
+      "poet":         {"@id": "dms:poet"},
+      "curator":      {"@id": "schema:curator"},
+      "recorder":     {"@id": "dms:recorder"},
+      "editor":       {"@id": "bibo:editor"},
+      "translator":   {"@id": "bibo:translator"},
+      "organizer":    {"@id": "bibo:organizer"},
+      "contributor":  {"@id": "dcterms:contributor"}
+    }
+  }
+}

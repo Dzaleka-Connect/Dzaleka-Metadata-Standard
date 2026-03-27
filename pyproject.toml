@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dzaleka-metadata-standard"
+version = "1.0.0"
+description = "An open-source metadata standard for documenting and sharing Dzaleka's digital heritage."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Dzaleka Digital Heritage"},
+]
+keywords = [
+    "metadata",
+    "heritage",
+    "dzaleka",
+    "dublin-core",
+    "refugee",
+    "digital-archive",
+    "cultural-heritage",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Documentation",
+    "Topic :: Sociology :: History",
+    "Topic :: Text Processing :: Markup",
+]
+dependencies = [
+    "click>=8.0",
+    "jsonschema>=4.0",
+    "pyyaml>=6.0",
+    "rich>=13.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[project.scripts]
+dms = "dms.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Dzaleka-Connect/Dzaleka-Metadata-Standard"
+Documentation = "https://github.com/Dzaleka-Connect/Dzaleka-Metadata-Standard/tree/main/docs"
+Repository = "https://github.com/Dzaleka-Connect/Dzaleka-Metadata-Standard"
+Issues = "https://github.com/Dzaleka-Connect/Dzaleka-Metadata-Standard/issues"
+
+[tool.setuptools.packages.find]
+include = ["dms*"]
+
+[tool.setuptools.package-data]
+dms = ["../schema/*.json", "../schema/*.yaml", "../schema/*.jsonld"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"

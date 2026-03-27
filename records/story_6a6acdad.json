@@ -1,0 +1,29 @@
+{
+  "id": "6a6acdad-2080-4816-9e22-9e45f21ad8aa",
+  "title": "DMS Testing",
+  "type": "story",
+  "description": "DMS Description",
+  "language": "en",
+  "relation": [
+    "8923-nwneroi3-23243"
+  ],
+  "creator": [
+    {
+      "name": "John Doe",
+      "role": "author",
+      "affiliation": "DMS"
+    }
+  ],
+  "date": {
+    "created": "2026-03-27"
+  },
+  "location": {
+    "name": "Dzaleka Refugee Camp",
+    "area": "Community Space"
+  },
+  "rights": {
+    "license": "CC-BY-4.0",
+    "access_level": "public"
+  },
+  "schema_version": "1.0.0"
+}
