@@ -10,7 +10,7 @@ from pathlib import Path
 from functools import lru_cache
 
 
-SCHEMA_DIR = Path(__file__).resolve().parent.parent / "schema"
+SCHEMA_DIR = Path(__file__).resolve().parent / "data" / "schema"
 SCHEMA_FILE = SCHEMA_DIR / "dms.json"
 
 

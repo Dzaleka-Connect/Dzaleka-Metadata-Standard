@@ -63,7 +63,7 @@ Issues = "https://github.com/Dzaleka-Connect/Dzaleka-Metadata-Standard/issues"
 include = ["dms*"]
 
 [tool.setuptools.package-data]
-dms = ["../schema/*.json", "../schema/*.yaml", "../schema/*.jsonld"]
+dms = ["templates/*.html", "data/schema/*.json", "data/schema/*.yaml", "data/schema/*.jsonld"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -12,7 +12,7 @@ from rich.console import Console
 
 console = Console()
 
-CONTEXT_FILE = Path(__file__).resolve().parent.parent / "schema" / "dms.jsonld"
+CONTEXT_FILE = Path(__file__).resolve().parent / "data" / "schema" / "dms.jsonld"
 
 
 def load_context() -> dict:
