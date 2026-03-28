@@ -349,6 +349,31 @@ def info():
     console.print(f"  [bold]Access Levels:[/bold] {', '.join(get_access_levels())}")
     console.print()
 
+# ─── sync ──────────────────────────────────────────────────────────────────────
+
+@main.command()
+@click.option("-d", "--dir", "directory", type=click.Path(exists=True, file_okay=False), default="records", help="Directory of DMS records to sync.")
+@click.option("-r", "--remote", type=str, default=None, help="Set the GitHub/GitLab remote URL to back up to.")
+@click.option("-m", "--message", type=str, default=None, help="Custom commit message.")
+def sync(directory, remote, message):
+    """Securely back up and synchronize JSON records via Git.
+
+    Automatically versions your records offline, and pushes them 
+    to a centralized repository if you have internet access.
+
+    Examples:
+
+        dms sync
+
+        dms sync --remote git@github.com:Dzaleka-Connect/Core-Archive.git
+
+        dms sync --message "Added new oral histories"
+    """
+    from dms.sync import sync_records
+    
+    sync_records(directory=directory, remote=remote, message=message)
+
+
 # ─── web ─────────────────────────────────────────────────────────────────────
 
 @main.command()
