@@ -7,6 +7,7 @@
   "creator": [
     {
       "name": "Marie Consolée",
+      "identifier": "dms-person:marie-consolee",
       "role": "narrator"
     }
   ],
@@ -19,8 +20,16 @@
     "displacement",
     "Congo"
   ],
+  "subject_ref": [
+    {
+      "identifier": "dms-subject:oral-history",
+      "label": "oral history",
+      "scheme": "DMS Subject Taxonomy"
+    }
+  ],
   "location": {
     "name": "Dzaleka Refugee Camp",
+    "identifier": "dms-place:dzaleka-community-center",
     "area": "Community Center",
     "latitude": -13.7833,
     "longitude": 33.9833
@@ -29,11 +38,30 @@
   "rights": {
     "license": "CC-BY-NC-4.0",
     "access_level": "public",
+    "consent_status": "obtained",
+    "sensitivity": [
+      "trauma-sensitive"
+    ],
+    "access_note": "Validated for educational reuse.",
     "holder": "Marie Consolée"
   },
   "source": {
     "contributor": "Dzaleka Digital Heritage Project",
-    "collection": "Oral Histories 2024"
+    "collection": "Oral Histories 2024",
+    "collection_identifier": "dms-collection:oral-histories-2024"
   },
-  "schema_version": "1.0.0"
+  "technical": {
+    "filename": "story_b3e7c8a1.txt",
+    "checksum": "1d4e6f8a9b0c2d3e4f567890abcdef1234567890fedcba9876543210abcdef12",
+    "checksum_algorithm": "sha256",
+    "file_size_bytes": 48123,
+    "page_count": 12
+  },
+  "relation_detail": [
+    {
+      "target": "urn:dms:source-recording:journey-to-dzaleka",
+      "relation_type": "transcription_of"
+    }
+  ],
+  "schema_version": "1.1.0"
 }

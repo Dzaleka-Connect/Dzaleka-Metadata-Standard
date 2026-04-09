@@ -26,21 +26,43 @@ CSV_COLUMNS = [
     "description",
     "language",
     "creator_name",
+    "creator_identifier",
     "creator_role",
     "date_created",
     "date_event",
     "subject",
+    "subject_ref_identifier",
+    "subject_ref_label",
+    "subject_ref_scheme",
     "location_name",
+    "location_identifier",
     "location_area",
     "location_latitude",
     "location_longitude",
     "format",
     "rights_license",
     "rights_access_level",
+    "rights_consent_status",
+    "rights_sensitivity",
+    "rights_access_note",
     "rights_holder",
     "source_contributor",
     "source_collection",
+    "source_collection_identifier",
     "source_original_format",
+    "technical_file_uri",
+    "technical_filename",
+    "technical_checksum",
+    "technical_checksum_algorithm",
+    "technical_file_size_bytes",
+    "technical_duration_seconds",
+    "technical_page_count",
+    "technical_width_px",
+    "technical_height_px",
+    "relation_detail_target",
+    "relation_detail_type",
+    "relation_detail_label",
+    "relation_detail_note",
     "schema_version",
 ]
 
@@ -147,6 +169,7 @@ def _csv_row_to_record(row: dict) -> dict:
     creator_name = row.get("creator_name", "").strip()
     if creator_name:
         names = creator_name.split(MULTI_VALUE_DELIMITER)
+        identifiers = row.get("creator_identifier", "").strip().split(MULTI_VALUE_DELIMITER)
         roles = row.get("creator_role", "").strip().split(MULTI_VALUE_DELIMITER)
         creators = []
         for i, name in enumerate(names):
@@ -154,6 +177,8 @@ def _csv_row_to_record(row: dict) -> dict:
             if not name:
                 continue
             creator = {"name": name}
+            if i < len(identifiers) and identifiers[i].strip():
+                creator["identifier"] = identifiers[i].strip()
             if i < len(roles) and roles[i].strip():
                 creator["role"] = roles[i].strip()
             creators.append(creator)
@@ -176,11 +201,31 @@ def _csv_row_to_record(row: dict) -> dict:
     if subject:
         record["subject"] = [s.strip() for s in subject.split(MULTI_VALUE_DELIMITER) if s.strip()]
 
+    subject_ref_ids = row.get("subject_ref_identifier", "").strip().split(MULTI_VALUE_DELIMITER)
+    subject_ref_labels = row.get("subject_ref_label", "").strip().split(MULTI_VALUE_DELIMITER)
+    subject_ref_schemes = row.get("subject_ref_scheme", "").strip().split(MULTI_VALUE_DELIMITER)
+    subject_refs = []
+    for i, identifier in enumerate(subject_ref_ids):
+        identifier = identifier.strip()
+        if not identifier:
+            continue
+        subject_ref = {"identifier": identifier}
+        if i < len(subject_ref_labels) and subject_ref_labels[i].strip():
+            subject_ref["label"] = subject_ref_labels[i].strip()
+        if i < len(subject_ref_schemes) and subject_ref_schemes[i].strip():
+            subject_ref["scheme"] = subject_ref_schemes[i].strip()
+        subject_refs.append(subject_ref)
+    if subject_refs:
+        record["subject_ref"] = subject_refs
+
     # Location
     location = {}
     loc_name = row.get("location_name", "").strip()
     if loc_name:
         location["name"] = loc_name
+    loc_identifier = row.get("location_identifier", "").strip()
+    if loc_identifier:
+        location["identifier"] = loc_identifier
     loc_area = row.get("location_area", "").strip()
     if loc_area:
         location["area"] = loc_area
@@ -212,6 +257,15 @@ def _csv_row_to_record(row: dict) -> dict:
     access = row.get("rights_access_level", "").strip()
     if access:
         rights["access_level"] = access
+    consent_status = row.get("rights_consent_status", "").strip()
+    if consent_status:
+        rights["consent_status"] = consent_status
+    sensitivity = row.get("rights_sensitivity", "").strip()
+    if sensitivity:
+        rights["sensitivity"] = [s.strip() for s in sensitivity.split(MULTI_VALUE_DELIMITER) if s.strip()]
+    access_note = row.get("rights_access_note", "").strip()
+    if access_note:
+        rights["access_note"] = access_note
     holder = row.get("rights_holder", "").strip()
     if holder:
         rights["holder"] = holder
@@ -226,11 +280,81 @@ def _csv_row_to_record(row: dict) -> dict:
     collection = row.get("source_collection", "").strip()
     if collection:
         source["collection"] = collection
+    collection_identifier = row.get("source_collection_identifier", "").strip()
+    if collection_identifier:
+        source["collection_identifier"] = collection_identifier
     orig_fmt = row.get("source_original_format", "").strip()
     if orig_fmt:
         source["original_format"] = orig_fmt
     if source:
         record["source"] = source
+
+    # Technical
+    technical = {}
+    file_uri = row.get("technical_file_uri", "").strip()
+    if file_uri:
+        technical["file_uri"] = file_uri
+    filename = row.get("technical_filename", "").strip()
+    if filename:
+        technical["filename"] = filename
+    checksum = row.get("technical_checksum", "").strip()
+    if checksum:
+        technical["checksum"] = checksum
+    checksum_algorithm = row.get("technical_checksum_algorithm", "").strip()
+    if checksum_algorithm:
+        technical["checksum_algorithm"] = checksum_algorithm
+    file_size_bytes = row.get("technical_file_size_bytes", "").strip()
+    if file_size_bytes:
+        try:
+            technical["file_size_bytes"] = int(file_size_bytes)
+        except ValueError:
+            pass
+    duration_seconds = row.get("technical_duration_seconds", "").strip()
+    if duration_seconds:
+        try:
+            technical["duration_seconds"] = float(duration_seconds)
+        except ValueError:
+            pass
+    page_count = row.get("technical_page_count", "").strip()
+    if page_count:
+        try:
+            technical["page_count"] = int(page_count)
+        except ValueError:
+            pass
+    width_px = row.get("technical_width_px", "").strip()
+    if width_px:
+        try:
+            technical["width_px"] = int(width_px)
+        except ValueError:
+            pass
+    height_px = row.get("technical_height_px", "").strip()
+    if height_px:
+        try:
+            technical["height_px"] = int(height_px)
+        except ValueError:
+            pass
+    if technical:
+        record["technical"] = technical
+
+    # Typed relations
+    relation_targets = row.get("relation_detail_target", "").strip().split(MULTI_VALUE_DELIMITER)
+    relation_types = row.get("relation_detail_type", "").strip().split(MULTI_VALUE_DELIMITER)
+    relation_labels = row.get("relation_detail_label", "").strip().split(MULTI_VALUE_DELIMITER)
+    relation_notes = row.get("relation_detail_note", "").strip().split(MULTI_VALUE_DELIMITER)
+    relation_details = []
+    for i, target in enumerate(relation_targets):
+        target = target.strip()
+        relation_type = relation_types[i].strip() if i < len(relation_types) else ""
+        if not target or not relation_type:
+            continue
+        relation_detail = {"target": target, "relation_type": relation_type}
+        if i < len(relation_labels) and relation_labels[i].strip():
+            relation_detail["label"] = relation_labels[i].strip()
+        if i < len(relation_notes) and relation_notes[i].strip():
+            relation_detail["note"] = relation_notes[i].strip()
+        relation_details.append(relation_detail)
+    if relation_details:
+        record["relation_detail"] = relation_details
 
     # Schema version
     sv = row.get("schema_version", "").strip()
@@ -254,9 +378,11 @@ def _record_to_csv_row(record: dict) -> dict:
     creators = record.get("creator", [])
     if creators:
         row["creator_name"] = MULTI_VALUE_DELIMITER.join(c.get("name", "") for c in creators)
+        row["creator_identifier"] = MULTI_VALUE_DELIMITER.join(c.get("identifier", "") for c in creators)
         row["creator_role"] = MULTI_VALUE_DELIMITER.join(c.get("role", "") for c in creators)
     else:
         row["creator_name"] = ""
+        row["creator_identifier"] = ""
         row["creator_role"] = ""
 
     # Date
@@ -268,9 +394,20 @@ def _record_to_csv_row(record: dict) -> dict:
     subjects = record.get("subject", [])
     row["subject"] = MULTI_VALUE_DELIMITER.join(subjects)
 
+    subject_refs = record.get("subject_ref", [])
+    if subject_refs:
+        row["subject_ref_identifier"] = MULTI_VALUE_DELIMITER.join(s.get("identifier", "") for s in subject_refs)
+        row["subject_ref_label"] = MULTI_VALUE_DELIMITER.join(s.get("label", "") for s in subject_refs)
+        row["subject_ref_scheme"] = MULTI_VALUE_DELIMITER.join(s.get("scheme", "") for s in subject_refs)
+    else:
+        row["subject_ref_identifier"] = ""
+        row["subject_ref_label"] = ""
+        row["subject_ref_scheme"] = ""
+
     # Location
     location = record.get("location", {})
     row["location_name"] = location.get("name", "")
+    row["location_identifier"] = location.get("identifier", "")
     row["location_area"] = location.get("area", "")
     row["location_latitude"] = str(location.get("latitude", "")) if "latitude" in location else ""
     row["location_longitude"] = str(location.get("longitude", "")) if "longitude" in location else ""
@@ -282,13 +419,43 @@ def _record_to_csv_row(record: dict) -> dict:
     rights = record.get("rights", {})
     row["rights_license"] = rights.get("license", "")
     row["rights_access_level"] = rights.get("access_level", "")
+    row["rights_consent_status"] = rights.get("consent_status", "")
+    sensitivities = rights.get("sensitivity", [])
+    row["rights_sensitivity"] = MULTI_VALUE_DELIMITER.join(sensitivities) if isinstance(sensitivities, list) else ""
+    row["rights_access_note"] = rights.get("access_note", "")
     row["rights_holder"] = rights.get("holder", "")
 
     # Source
     source = record.get("source", {})
     row["source_contributor"] = source.get("contributor", "")
     row["source_collection"] = source.get("collection", "")
+    row["source_collection_identifier"] = source.get("collection_identifier", "")
     row["source_original_format"] = source.get("original_format", "")
+
+    # Technical
+    technical = record.get("technical", {})
+    row["technical_file_uri"] = technical.get("file_uri", "")
+    row["technical_filename"] = technical.get("filename", "")
+    row["technical_checksum"] = technical.get("checksum", "")
+    row["technical_checksum_algorithm"] = technical.get("checksum_algorithm", "")
+    row["technical_file_size_bytes"] = technical.get("file_size_bytes", "")
+    row["technical_duration_seconds"] = technical.get("duration_seconds", "")
+    row["technical_page_count"] = technical.get("page_count", "")
+    row["technical_width_px"] = technical.get("width_px", "")
+    row["technical_height_px"] = technical.get("height_px", "")
+
+    # Typed relations
+    relation_details = record.get("relation_detail", [])
+    if relation_details:
+        row["relation_detail_target"] = MULTI_VALUE_DELIMITER.join(r.get("target", "") for r in relation_details)
+        row["relation_detail_type"] = MULTI_VALUE_DELIMITER.join(r.get("relation_type", "") for r in relation_details)
+        row["relation_detail_label"] = MULTI_VALUE_DELIMITER.join(r.get("label", "") for r in relation_details)
+        row["relation_detail_note"] = MULTI_VALUE_DELIMITER.join(r.get("note", "") for r in relation_details)
+    else:
+        row["relation_detail_target"] = ""
+        row["relation_detail_type"] = ""
+        row["relation_detail_label"] = ""
+        row["relation_detail_note"] = ""
 
     # Schema version
     row["schema_version"] = record.get("schema_version", "")

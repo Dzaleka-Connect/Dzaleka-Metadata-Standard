@@ -20,6 +20,9 @@ from dms.schema import (
     get_type_enum,
     get_creator_roles,
     get_access_levels,
+    get_consent_statuses,
+    get_sensitivity_values,
+    get_relation_types,
     get_schema_version,
 )
 
@@ -96,6 +99,14 @@ def generate_record(output_path: str | Path | None = None, preset_type: str | No
                 type=str,
             ).strip()
 
+            identifier = click.prompt(
+                click.style("    Creator identifier (leave blank to skip)", fg="cyan"),
+                type=str,
+                default="",
+            ).strip()
+            if identifier:
+                creator["identifier"] = identifier
+
             roles = get_creator_roles()
             console.print(f"    [dim]Available roles: {', '.join(roles)}[/dim]")
             role = click.prompt(
@@ -141,6 +152,39 @@ def generate_record(output_path: str | Path | None = None, preset_type: str | No
     if tags_input:
         record["subject"] = [t.strip() for t in tags_input.split(",") if t.strip()]
 
+    if click.confirm(click.style("  Add structured subject references?", fg="yellow"), default=False):
+        subject_refs = []
+        while True:
+            subject_ref = {}
+            identifier = click.prompt(
+                click.style("    Subject identifier", fg="cyan"),
+                type=str,
+            ).strip()
+            subject_ref["identifier"] = identifier
+
+            label = click.prompt(
+                click.style("    Subject label (leave blank to skip)", fg="cyan"),
+                type=str,
+                default="",
+            ).strip()
+            if label:
+                subject_ref["label"] = label
+
+            scheme = click.prompt(
+                click.style("    Scheme name (leave blank to skip)", fg="cyan"),
+                type=str,
+                default="",
+            ).strip()
+            if scheme:
+                subject_ref["scheme"] = scheme
+
+            subject_refs.append(subject_ref)
+            if not click.confirm(click.style("    Add another subject reference?", fg="yellow"), default=False):
+                break
+
+        if subject_refs:
+            record["subject_ref"] = subject_refs
+
     # --- Location ---
     if click.confirm(click.style("  Add location?", fg="yellow"), default=True):
         location = {}
@@ -149,6 +193,14 @@ def generate_record(output_path: str | Path | None = None, preset_type: str | No
             type=str,
             default="Dzaleka Refugee Camp",
         ).strip()
+
+        identifier = click.prompt(
+            click.style("    Location identifier (leave blank to skip)", fg="cyan"),
+            type=str,
+            default="",
+        ).strip()
+        if identifier:
+            location["identifier"] = identifier
 
         area = click.prompt(
             click.style("    Area/section (leave blank to skip)", fg="cyan"),
@@ -201,6 +253,29 @@ def generate_record(output_path: str | Path | None = None, preset_type: str | No
         )
         rights["access_level"] = access
 
+        consent_statuses = get_consent_statuses()
+        console.print(f"    [dim]Consent statuses: {', '.join(consent_statuses)}[/dim]")
+        consent_status = click.prompt(
+            click.style("    Consent status (leave blank to skip)", fg="cyan"),
+            type=str,
+            default="",
+        ).strip().lower()
+        if consent_status and consent_status in consent_statuses:
+            rights["consent_status"] = consent_status
+
+        sensitivity_values = get_sensitivity_values()
+        console.print(f"    [dim]Sensitivity values: {', '.join(sensitivity_values)}[/dim]")
+        sensitivities = click.prompt(
+            click.style("    Sensitivity tags (comma-separated, leave blank to skip)", fg="cyan"),
+            type=str,
+            default="",
+        ).strip()
+        if sensitivities:
+            selected = [s.strip().lower() for s in sensitivities.split(",") if s.strip()]
+            valid = [s for s in selected if s in sensitivity_values]
+            if valid:
+                rights["sensitivity"] = valid
+
         holder = click.prompt(
             click.style("    Rights holder (leave blank to skip)", fg="cyan"),
             type=str,
@@ -208,6 +283,14 @@ def generate_record(output_path: str | Path | None = None, preset_type: str | No
         ).strip()
         if holder:
             rights["holder"] = holder
+
+        access_note = click.prompt(
+            click.style("    Access note (leave blank to skip)", fg="cyan"),
+            type=str,
+            default="",
+        ).strip()
+        if access_note:
+            rights["access_note"] = access_note
 
         record["rights"] = rights
 
@@ -230,6 +313,14 @@ def generate_record(output_path: str | Path | None = None, preset_type: str | No
         if collection:
             source["collection"] = collection
 
+        collection_identifier = click.prompt(
+            click.style("    Collection identifier (leave blank to skip)", fg="cyan"),
+            type=str,
+            default="",
+        ).strip()
+        if collection_identifier:
+            source["collection_identifier"] = collection_identifier
+
         orig_format = click.prompt(
             click.style("    Original format (e.g., 'handwritten notebook')", fg="cyan"),
             type=str,
@@ -240,6 +331,124 @@ def generate_record(output_path: str | Path | None = None, preset_type: str | No
 
         if source:
             record["source"] = source
+
+    # --- Technical metadata ---
+    if click.confirm(click.style("  Add technical file metadata?", fg="yellow"), default=False):
+        technical = {}
+        file_uri = click.prompt(
+            click.style("    File URI (leave blank to skip)", fg="cyan"),
+            type=str,
+            default="",
+        ).strip()
+        if file_uri:
+            technical["file_uri"] = file_uri
+
+        filename = click.prompt(
+            click.style("    Filename (leave blank to skip)", fg="cyan"),
+            type=str,
+            default="",
+        ).strip()
+        if filename:
+            technical["filename"] = filename
+
+        checksum = click.prompt(
+            click.style("    Checksum (leave blank to skip)", fg="cyan"),
+            type=str,
+            default="",
+        ).strip()
+        if checksum:
+            technical["checksum"] = checksum
+
+        checksum_algorithm = click.prompt(
+            click.style("    Checksum algorithm (leave blank to skip)", fg="cyan"),
+            type=str,
+            default="",
+        ).strip().lower()
+        if checksum_algorithm:
+            technical["checksum_algorithm"] = checksum_algorithm
+
+        file_size_bytes = click.prompt(
+            click.style("    File size in bytes (leave blank to skip)", fg="cyan"),
+            type=str,
+            default="",
+        ).strip()
+        if file_size_bytes:
+            technical["file_size_bytes"] = int(file_size_bytes)
+
+        duration_seconds = click.prompt(
+            click.style("    Duration in seconds (leave blank to skip)", fg="cyan"),
+            type=str,
+            default="",
+        ).strip()
+        if duration_seconds:
+            technical["duration_seconds"] = float(duration_seconds)
+
+        page_count = click.prompt(
+            click.style("    Page count (leave blank to skip)", fg="cyan"),
+            type=str,
+            default="",
+        ).strip()
+        if page_count:
+            technical["page_count"] = int(page_count)
+
+        width_px = click.prompt(
+            click.style("    Width in pixels (leave blank to skip)", fg="cyan"),
+            type=str,
+            default="",
+        ).strip()
+        if width_px:
+            technical["width_px"] = int(width_px)
+
+        height_px = click.prompt(
+            click.style("    Height in pixels (leave blank to skip)", fg="cyan"),
+            type=str,
+            default="",
+        ).strip()
+        if height_px:
+            technical["height_px"] = int(height_px)
+
+        if technical:
+            record["technical"] = technical
+
+    # --- Typed relations ---
+    if click.confirm(click.style("  Add typed relations?", fg="yellow"), default=False):
+        relation_types = get_relation_types()
+        relation_details = []
+        console.print(f"  [dim]Relation types: {', '.join(relation_types)}[/dim]")
+        while True:
+            relation_detail = {}
+            relation_detail["target"] = click.prompt(
+                click.style("    Related record or resource identifier", fg="cyan"),
+                type=str,
+            ).strip()
+            relation_type = click.prompt(
+                click.style("    Relation type", fg="cyan"),
+                type=click.Choice(relation_types, case_sensitive=False),
+            )
+            relation_detail["relation_type"] = relation_type
+
+            label = click.prompt(
+                click.style("    Label (leave blank to skip)", fg="cyan"),
+                type=str,
+                default="",
+            ).strip()
+            if label:
+                relation_detail["label"] = label
+
+            note = click.prompt(
+                click.style("    Note (leave blank to skip)", fg="cyan"),
+                type=str,
+                default="",
+            ).strip()
+            if note:
+                relation_detail["note"] = note
+
+            relation_details.append(relation_detail)
+            if not click.confirm(click.style("    Add another typed relation?", fg="yellow"), default=False):
+                break
+
+        if relation_details:
+            record["relation_detail"] = relation_details
 
     # --- Output ---
     record_json = json.dumps(record, indent=2, ensure_ascii=False)

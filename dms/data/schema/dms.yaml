@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://github.com/Dzaleka-Connect/Dzaleka-Metadata-Standard/schema/dms.json
+$id: https://github.com/Dzaleka-Connect/Dzaleka-Metadata-Standard/dms/data/schema/dms.json
 title: Dzaleka Metadata Standard (DMS) Record
 description: A metadata schema for describing heritage items from Dzaleka refugee
   camp. Based on Dublin Core with community-specific extensions.
@@ -48,7 +48,15 @@ properties:
       type: string
       minLength: 1
     uniqueItems: true
-    description: Tags or keywords describing the item's content. Maps to dc:subject.
+    description: Controlled tags or keywords describing the item's content. Prefer
+      shared, canonical terms from a local vocabulary or taxonomy where possible.
+      Maps to dc:subject.
+  subject_ref:
+    type: array
+    items:
+      $ref: '#/$defs/ConceptReference'
+    description: Optional structured references for subject concepts, including stable
+      identifiers and taxonomy scheme names.
   language:
     type: string
     pattern: ^[a-z]{2,3}(-[A-Z]{2,4})?$
@@ -70,6 +78,10 @@ properties:
     pattern: ^[a-z]+/[a-z0-9.+-]+$
     description: MIME type of the digital object (e.g., 'image/jpeg', 'audio/mpeg').
       Maps to dc:format.
+  technical:
+    $ref: '#/$defs/Technical'
+    description: Technical file metadata for the digital representation, such as filename,
+      checksum, and size.
   relation:
     type: array
     items:
@@ -77,12 +89,18 @@ properties:
       format: uuid
     uniqueItems: true
     description: IDs of related DMS records. Maps to dc:relation.
+  relation_detail:
+    type: array
+    items:
+      $ref: '#/$defs/RelationDetail'
+    description: Optional typed relationships to related records or external resources,
+      such as transcription_of or derived_from.
   coverage:
     $ref: '#/$defs/Coverage'
     description: Temporal extent or scope of the item's content. Maps to dc:coverage.
   schema_version:
     type: string
-    const: 1.0.0
+    const: 1.1.0
     description: Version of the DMS schema this record conforms to.
 required:
 - id
@@ -99,6 +117,11 @@ $defs:
         type: string
         minLength: 1
         description: Full name of the creator.
+      identifier:
+        type: string
+        minLength: 1
+        description: Stable local identifier or URI for the creator when an authority
+          record exists.
       role:
         type: string
         enum:
@@ -140,6 +163,22 @@ $defs:
         format: date
         description: Date of the event or original creation of the heritage item.
     additionalProperties: false
+  ConceptReference:
+    type: object
+    properties:
+      identifier:
+        type: string
+        minLength: 1
+        description: Stable local identifier or URI for the concept.
+      label:
+        type: string
+        description: Human-readable preferred label for the concept.
+      scheme:
+        type: string
+        description: Name of the local taxonomy or concept scheme.
+    required:
+    - identifier
+    additionalProperties: false
   Location:
     type: object
     properties:
@@ -147,6 +186,11 @@ $defs:
         type: string
         minLength: 1
         description: Human-readable place name (e.g., 'Dzaleka Refugee Camp').
+      identifier:
+        type: string
+        minLength: 1
+        description: Stable local identifier or URI for the place when a place authority
+          entry exists.
       area:
         type: string
         description: Specific area or section within the location (e.g., 'Section
@@ -178,6 +222,31 @@ $defs:
         - community-only
         description: Who can access this item. 'public' = open to all, 'restricted'
           = requires permission, 'community-only' = Dzaleka community members.
+      consent_status:
+        type: string
+        enum:
+        - obtained
+        - pending
+        - not-required
+        - unknown
+        - withheld
+        description: Status of consent for sharing the item or its identifiable contents.
+      sensitivity:
+        type: array
+        items:
+          type: string
+          enum:
+          - personal-data
+          - culturally-sensitive
+          - trauma-sensitive
+          - minors
+          - sacred-knowledge
+        uniqueItems: true
+        description: Sensitivity markers that may affect description, access, or reuse.
+      access_note:
+        type: string
+        description: Additional explanation for restrictions, review context, or safe-use
+          guidance.
       holder:
         type: string
         description: Name of the rights holder or copyright owner.
@@ -192,10 +261,86 @@ $defs:
         type: string
         description: Named collection this item belongs to (e.g., 'Oral Histories
           2024', 'Camp Maps').
+      collection_identifier:
+        type: string
+        description: Stable local identifier or URI for the collection.
       original_format:
         type: string
         description: Original format of the item before digitization (e.g., 'handwritten
           notebook', 'cassette tape').
+    additionalProperties: false
+  Technical:
+    type: object
+    properties:
+      file_uri:
+        type: string
+        format: uri
+        description: Canonical URI for the digital file when available.
+      filename:
+        type: string
+        description: File name of the digital representation.
+      checksum:
+        type: string
+        description: Checksum value used for fixity verification.
+      checksum_algorithm:
+        type: string
+        enum:
+        - md5
+        - sha1
+        - sha256
+        - sha512
+        description: Algorithm used to generate the checksum.
+      file_size_bytes:
+        type: integer
+        minimum: 0
+        description: File size in bytes.
+      duration_seconds:
+        type: number
+        minimum: 0
+        description: Duration of an audio or video file in seconds.
+      page_count:
+        type: integer
+        minimum: 1
+        description: Number of pages for paginated documents.
+      width_px:
+        type: integer
+        minimum: 1
+        description: Pixel width for image or video content.
+      height_px:
+        type: integer
+        minimum: 1
+        description: Pixel height for image or video content.
+    additionalProperties: false
+  RelationDetail:
+    type: object
+    properties:
+      target:
+        type: string
+        minLength: 1
+        description: Identifier or URI of the related record or resource.
+      relation_type:
+        type: string
+        enum:
+        - has_part
+        - is_part_of
+        - transcription_of
+        - translation_of
+        - recording_of
+        - digitization_of
+        - derived_from
+        - references
+        - accompanies
+        - version_of
+        description: Nature of the relationship to the target resource.
+      label:
+        type: string
+        description: Human-readable label for the related resource.
+      note:
+        type: string
+        description: Additional note clarifying the relationship.
+    required:
+    - target
+    - relation_type
     additionalProperties: false
   Coverage:
     type: object

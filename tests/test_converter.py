@@ -95,6 +95,37 @@ class TestCsvToJson:
         assert record["location"]["latitude"] == -13.7833
         assert record["location"]["longitude"] == 33.9833
 
+    def test_structured_fields_parsed(self):
+        """Structured subject refs, technical metadata, and typed relations should parse."""
+        row = {
+            "id": "test-id",
+            "title": "Test",
+            "type": "story",
+            "description": "Test",
+            "language": "en",
+            "creator_name": "Alice",
+            "creator_identifier": "dms-person:alice",
+            "subject_ref_identifier": "dms-subject:oral-history",
+            "subject_ref_label": "oral history",
+            "subject_ref_scheme": "DMS Subject Taxonomy",
+            "location_name": "Dzaleka",
+            "location_identifier": "dms-place:dzaleka",
+            "rights_consent_status": "obtained",
+            "rights_sensitivity": "trauma-sensitive|personal-data",
+            "technical_filename": "test.txt",
+            "technical_file_size_bytes": "12",
+            "relation_detail_target": "urn:dms:test-source",
+            "relation_detail_type": "transcription_of",
+        }
+        record = _csv_row_to_record(row)
+        assert record["creator"][0]["identifier"] == "dms-person:alice"
+        assert record["subject_ref"][0]["identifier"] == "dms-subject:oral-history"
+        assert record["location"]["identifier"] == "dms-place:dzaleka"
+        assert record["rights"]["consent_status"] == "obtained"
+        assert record["rights"]["sensitivity"] == ["trauma-sensitive", "personal-data"]
+        assert record["technical"]["file_size_bytes"] == 12
+        assert record["relation_detail"][0]["relation_type"] == "transcription_of"
+
     def test_empty_optional_fields_omitted(self):
         """Empty optional fields should not appear in the record."""
         row = {
@@ -191,6 +222,25 @@ class TestJsonToCsv:
         record = {"subject": ["history", "culture", "music"]}
         row = _record_to_csv_row(record)
         assert row["subject"] == "history|culture|music"
+
+    def test_structured_fields_flattened(self):
+        """Structured v1.1 fields should flatten into CSV columns."""
+        record = {
+            "creator": [{"name": "Alice", "identifier": "dms-person:alice", "role": "author"}],
+            "subject_ref": [{"identifier": "dms-subject:oral-history", "label": "oral history", "scheme": "DMS Subject Taxonomy"}],
+            "location": {"name": "Dzaleka", "identifier": "dms-place:dzaleka"},
+            "rights": {"consent_status": "obtained", "sensitivity": ["trauma-sensitive"]},
+            "technical": {"filename": "test.txt", "file_size_bytes": 12},
+            "relation_detail": [{"target": "urn:dms:test-source", "relation_type": "transcription_of"}],
+        }
+        row = _record_to_csv_row(record)
+        assert row["creator_identifier"] == "dms-person:alice"
+        assert row["subject_ref_identifier"] == "dms-subject:oral-history"
+        assert row["location_identifier"] == "dms-place:dzaleka"
+        assert row["rights_consent_status"] == "obtained"
+        assert row["rights_sensitivity"] == "trauma-sensitive"
+        assert row["technical_file_size_bytes"] == 12
+        assert row["relation_detail_type"] == "transcription_of"
 
 
 class TestRoundTrip:

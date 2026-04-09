@@ -5,6 +5,24 @@ All notable changes to the Dzaleka Metadata Standard will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-04-10
+
+### Changed
+- **Schema**: Clarified `subject` as a controlled-vocabulary field in the JSON and YAML schema descriptions
+- **Schema**: Upgraded schema version to `1.1.0`
+- **JSON-LD**: Cleaned up object mappings for `license`, `collection`, `relation`, and nested metadata objects
+
+### Added
+- **Schema**: Optional `subject_ref`, `technical`, and `relation_detail` fields for authority IDs, file metadata, and typed relationships
+- **Schema**: Optional consent/sensitivity metadata under `rights`, plus creator, place, and collection identifiers
+- **CLI**: Interactive generator prompts for structured subject references, technical metadata, consent/sensitivity, and typed relations
+- **CLI**: CSV conversion support for new v1.1 fields
+- **Docs**: Semantic Tagging guide with AP-inspired recommendations for building a community-managed taxonomy
+- **Docs**: Semantic Tagging guide now includes AP developer-guide concepts such as authorities, stable identifiers, deprecations, mappings, and relevance-aware future tooling
+- **Docs**: Semantic Tagging guide now incorporates AP ontology patterns such as SKOS labels/matches, change notes, and geography/organization/person relationship modeling
+- **Docs**: Stronger guidance in the Field Guide and Best Practices on canonical subject terms and tag governance
+- **Examples**: Refreshed story and fixture examples showing v1.1 structured metadata patterns
+
 ## [1.0.0] - 2024-06-20
 
 ### Added

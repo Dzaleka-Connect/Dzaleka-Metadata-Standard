@@ -1,7 +1,7 @@
 """
 DMS Schema Loading and Resolution
 
-Handles loading the JSON Schema from the schema/ directory
+Handles loading the JSON Schema from the dms/data/schema/ directory
 and provides utilities for schema introspection.
 """
 
@@ -28,7 +28,7 @@ def load_schema() -> dict:
     if not SCHEMA_FILE.exists():
         raise FileNotFoundError(
             f"DMS schema not found at {SCHEMA_FILE}. "
-            "Ensure the schema/ directory is present."
+            "Ensure the dms/data/schema/ directory is present."
         )
     with open(SCHEMA_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -83,3 +83,31 @@ def get_access_levels() -> list[str]:
     rights = defs.get("Rights", {})
     access_prop = rights.get("properties", {}).get("access_level", {})
     return access_prop.get("enum", [])
+
+
+def get_consent_statuses() -> list[str]:
+    """Return the list of valid consent statuses."""
+    schema = load_schema()
+    defs = schema.get("$defs", {})
+    rights = defs.get("Rights", {})
+    consent_prop = rights.get("properties", {}).get("consent_status", {})
+    return consent_prop.get("enum", [])
+
+
+def get_sensitivity_values() -> list[str]:
+    """Return the list of valid sensitivity values."""
+    schema = load_schema()
+    defs = schema.get("$defs", {})
+    rights = defs.get("Rights", {})
+    sensitivity_prop = rights.get("properties", {}).get("sensitivity", {})
+    items = sensitivity_prop.get("items", {})
+    return items.get("enum", [])
+
+
+def get_relation_types() -> list[str]:
+    """Return the list of valid typed relation values."""
+    schema = load_schema()
+    defs = schema.get("$defs", {})
+    relation = defs.get("RelationDetail", {})
+    relation_type_prop = relation.get("properties", {}).get("relation_type", {})
+    return relation_type_prop.get("enum", [])

@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/Code-MIT-blue.svg)](LICENSE)
 [![License: CC BY 4.0](https://img.shields.io/badge/Docs-CC%20BY%204.0-lightgrey.svg)](LICENSE-DOCS)
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-green.svg)](https://www.python.org/)
-[![Schema: v1.0.0](https://img.shields.io/badge/Schema-v1.0.0-orange.svg)](schema/dms.json)
+[![Schema: v1.1.0](https://img.shields.io/badge/Schema-v1.1.0-orange.svg)](dms/data/schema/dms.json)
 
 > **An open-source metadata specification and toolkit for describing, organising, and sharing digital heritage content from Dzaleka Refugee Camp.**
 
@@ -33,9 +33,9 @@ DMS helps both technical systems and community contributors work with heritage c
 A machine-readable specification defining fields, types, and constraints for heritage metadata.
 
 Available formats:
-- **JSON Schema** — [`schema/dms.json`](schema/dms.json) (Draft 2020-12)
-- **YAML Schema** — [`schema/dms.yaml`](schema/dms.yaml)
-- **JSON-LD / RDF** — [`schema/dms.jsonld`](schema/dms.jsonld) for semantic web / linked data use
+- **JSON Schema** — [`dms/data/schema/dms.json`](dms/data/schema/dms.json) (Draft 2020-12)
+- **YAML Schema** — [`dms/data/schema/dms.yaml`](dms/data/schema/dms.yaml)
+- **JSON-LD / RDF** — [`dms/data/schema/dms.jsonld`](dms/data/schema/dms.jsonld) for semantic web / linked data use
 
 ### 🛠️ Python Tools & Web UI
 
@@ -140,12 +140,15 @@ A DMS record describes a single heritage item with these fields:
 | `language` | ✅ | Language code (BCP 47) |
 | `creator` | Recommended | Who created it (name, role, affiliation) |
 | `date` | Recommended | When it was created or occurred |
-| `subject` | Recommended | Tags and keywords |
+| `subject` | Recommended | Controlled tags and keywords |
+| `subject_ref` | Optional | Structured subject identifiers and scheme references |
 | `location` | Recommended | Place name, area, coordinates |
 | `rights` | Recommended | License, access level, holder |
 | `source` | Optional | Contributor, collection, original format |
 | `format` | Optional | MIME type of the digital object |
+| `technical` | Optional | File-level technical metadata |
 | `relation` | Optional | IDs of related records |
+| `relation_detail` | Optional | Typed relationships to related records or resources |
 | `coverage` | Optional | Time period covered |
 
 All fields map to [Dublin Core](https://www.dublincore.org/specifications/dublin-core/dcmi-terms/) for broad interoperability, with Dzaleka-specific extensions for camp areas and access levels.
@@ -153,20 +156,21 @@ All fields map to [Dublin Core](https://www.dublincore.org/specifications/dublin
 ## Repository Structure
 
 ```
-├── schema/              Schema definitions
-│   ├── dms.json         JSON Schema (Draft 2020-12)
-│   ├── dms.yaml         YAML version
-│   └── dms.jsonld       JSON-LD context for linked data
-│
 ├── dms/                 Python CLI tools
 │   ├── cli.py           Command entry points
 │   ├── validator.py     Schema validation engine
 │   ├── generator.py     Interactive record creator
 │   └── converter.py     CSV ↔ JSON converter
 │
+│   data/schema/         Schema definitions
+│   ├── dms.json         JSON Schema (Draft 2020-12)
+│   ├── dms.yaml         YAML version
+│   └── dms.jsonld       JSON-LD context for linked data
+│
 ├── docs/                Documentation
 │   ├── field-guide.md   Field definitions & guidelines
 │   ├── best-practices.md Metadata entry best practices
+│   ├── semantic-tagging.md Controlled vocabularies and richer subject metadata
 │   └── getting-started.md Installation & tutorial
 │
 ├── examples/            Sample records
@@ -201,11 +205,12 @@ The [`examples/`](examples/) directory contains sample records for common herita
 
 - **[Field Guide](docs/field-guide.md)** — Detailed definitions for every schema field
 - **[Best Practices](docs/best-practices.md)** — Guidelines for quality metadata entry
+- **[Semantic Tagging](docs/semantic-tagging.md)** — AP-inspired guidance for controlled vocabularies and richer subject metadata
 - **[Getting Started](docs/getting-started.md)** — Installation and first steps tutorial
 
 ## Interoperability
 
-DMS is designed to work with existing standards and systems. The [`dms.jsonld`](schema/dms.jsonld) context enables linked data publishing with mappings to:
+DMS is designed to work with existing standards and systems. The [`dms.jsonld`](dms/data/schema/dms.jsonld) context enables linked data publishing with mappings to:
 
 | Vocabulary | Prefix | Used for |
 |-----------|--------|----------|

@@ -63,7 +63,7 @@ dms validate --dir examples/
 
 ## Schema Changes
 
-Changes to the DMS schema (`schema/dms.json`) require extra care:
+Changes to the DMS schema (`dms/data/schema/dms.json`) require extra care:
 
 1. Discuss the change in a GitHub Issue first
 2. Ensure backward compatibility when possible

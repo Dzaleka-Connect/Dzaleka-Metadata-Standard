@@ -20,7 +20,7 @@ def load_context() -> dict:
     if not CONTEXT_FILE.exists():
         raise FileNotFoundError(
             f"DMS JSON-LD context not found at {CONTEXT_FILE}. "
-            "Ensure the schema/ directory is present."
+            "Ensure the dms/data/schema/ directory is present."
         )
     with open(CONTEXT_FILE, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -82,6 +82,17 @@ def record_to_jsonld(record: dict) -> dict:
             loc_ld = {"@type": "schema:Place"}
             loc_ld.update(value)
             doc["location"] = loc_ld
+        elif key == "subject_ref" and isinstance(value, list):
+            subject_refs = []
+            for ref in value:
+                ref_ld = {"@type": "skos:Concept"}
+                ref_ld.update(ref)
+                subject_refs.append(ref_ld)
+            doc["subject_ref"] = subject_refs
+        elif key == "technical" and isinstance(value, dict):
+            technical_ld = {"@type": "schema:MediaObject"}
+            technical_ld.update(value)
+            doc["technical"] = technical_ld
         else:
             doc[key] = value
 

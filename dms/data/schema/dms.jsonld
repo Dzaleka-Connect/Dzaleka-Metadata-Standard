@@ -2,12 +2,13 @@
   "@context": {
     "@version": 1.1,
 
-    "dms": "https://github.com/Dzaleka-Connect/Dzaleka-Metadata-Standard/schema#",
+    "dms": "https://github.com/Dzaleka-Connect/Dzaleka-Metadata-Standard/dms/data/schema#",
     "dc": "http://purl.org/dc/elements/1.1/",
     "dcterms": "http://purl.org/dc/terms/",
     "schema": "https://schema.org/",
     "foaf": "http://xmlns.com/foaf/0.1/",
     "bibo": "http://purl.org/ontology/bibo/",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
     "xsd": "http://www.w3.org/2001/XMLSchema#",
     "geo": "http://www.w3.org/2003/01/geo/wgs84_pos#",
     "skos": "http://www.w3.org/2004/02/skos/core#",
@@ -37,8 +38,11 @@
 
     "creator": {
       "@id": "dc:creator",
-      "@type": "@id",
       "@container": "@list"
+    },
+    "identifier": {
+      "@id": "dcterms:identifier",
+      "@type": "xsd:string"
     },
     "name": {
       "@id": "foaf:name",
@@ -54,8 +58,7 @@
     },
 
     "date": {
-      "@id": "dc:date",
-      "@type": "@id"
+      "@id": "dc:date"
     },
     "created": {
       "@id": "dcterms:created",
@@ -75,10 +78,21 @@
       "@type": "xsd:string",
       "@container": "@set"
     },
+    "subject_ref": {
+      "@id": "dms:subjectReference",
+      "@container": "@set"
+    },
+    "label": {
+      "@id": "rdfs:label",
+      "@type": "xsd:string"
+    },
+    "scheme": {
+      "@id": "dms:conceptScheme",
+      "@type": "xsd:string"
+    },
 
     "location": {
-      "@id": "dcterms:spatial",
-      "@type": "@id"
+      "@id": "dcterms:spatial"
     },
     "area": {
       "@id": "dms:campArea",
@@ -94,15 +108,27 @@
     },
 
     "rights": {
-      "@id": "dc:rights",
-      "@type": "@id"
+      "@id": "dc:rights"
     },
     "license": {
       "@id": "dcterms:license",
-      "@type": "@id"
+      "@type": "xsd:string"
     },
     "access_level": {
       "@id": "dms:accessLevel",
+      "@type": "xsd:string"
+    },
+    "consent_status": {
+      "@id": "dms:consentStatus",
+      "@type": "xsd:string"
+    },
+    "sensitivity": {
+      "@id": "dms:sensitivity",
+      "@type": "xsd:string",
+      "@container": "@set"
+    },
+    "access_note": {
+      "@id": "dms:accessNote",
       "@type": "xsd:string"
     },
     "holder": {
@@ -111,15 +137,18 @@
     },
 
     "source": {
-      "@id": "dc:source",
-      "@type": "@id"
+      "@id": "dc:source"
     },
     "contributor": {
       "@id": "dcterms:contributor",
       "@type": "xsd:string"
     },
     "collection": {
-      "@id": "bibo:Collection",
+      "@id": "dms:collectionName",
+      "@type": "xsd:string"
+    },
+    "collection_identifier": {
+      "@id": "dms:collectionIdentifier",
       "@type": "xsd:string"
     },
     "original_format": {
@@ -129,18 +158,72 @@
 
     "format": {
       "@id": "dc:format",
-      "@type": "dcterms:MediaType"
+      "@type": "xsd:string"
+    },
+    "technical": {
+      "@id": "dms:technicalMetadata"
+    },
+    "file_uri": {
+      "@id": "schema:contentUrl",
+      "@type": "@id"
+    },
+    "filename": {
+      "@id": "dms:filename",
+      "@type": "xsd:string"
+    },
+    "checksum": {
+      "@id": "dms:checksum",
+      "@type": "xsd:string"
+    },
+    "checksum_algorithm": {
+      "@id": "dms:checksumAlgorithm",
+      "@type": "xsd:string"
+    },
+    "file_size_bytes": {
+      "@id": "dms:fileSizeBytes",
+      "@type": "xsd:integer"
+    },
+    "duration_seconds": {
+      "@id": "dms:durationSeconds",
+      "@type": "xsd:decimal"
+    },
+    "page_count": {
+      "@id": "schema:numberOfPages",
+      "@type": "xsd:integer"
+    },
+    "width_px": {
+      "@id": "dms:widthPixels",
+      "@type": "xsd:integer"
+    },
+    "height_px": {
+      "@id": "dms:heightPixels",
+      "@type": "xsd:integer"
     },
 
     "relation": {
       "@id": "dc:relation",
-      "@type": "@id",
+      "@type": "xsd:string",
       "@container": "@set"
+    },
+    "relation_detail": {
+      "@id": "dms:relationDetail",
+      "@container": "@set"
+    },
+    "target": {
+      "@id": "dms:relationTarget",
+      "@type": "xsd:string"
+    },
+    "relation_type": {
+      "@id": "dms:relationType",
+      "@type": "xsd:string"
+    },
+    "note": {
+      "@id": "skos:note",
+      "@type": "xsd:string"
     },
 
     "coverage": {
-      "@id": "dc:coverage",
-      "@type": "@id"
+      "@id": "dc:coverage"
     },
     "start_date": {
       "@id": "schema:startDate",

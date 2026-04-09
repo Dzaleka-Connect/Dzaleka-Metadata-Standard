@@ -58,6 +58,9 @@ This launches a premium, dark-themed local web app at `http://localhost:8080` wh
 - Add multi-value creators and subject tags effortlessly
 - Copy and export raw JSON or JSON-LD
 
+The CLI wizard now also supports richer v1.1 fields such as structured subject references,
+technical metadata, consent/sensitivity metadata, and typed relations.
+
 ### Terminal / Interactive Mode
 
 For command-line users, you can run the interactive wizard:
@@ -204,8 +207,13 @@ This creates a JSON file with all records. See [batch.csv](../examples/batch.csv
 
 **Multi-value columns** use `|` (pipe) as a separator:
 - Creator names: `Alice|Bob`
+- Creator identifiers: `dms-person:alice|dms-person:bob`
 - Creator roles: `narrator|interviewer`
 - Subject tags: `history|culture|music`
+- Sensitivity tags: `trauma-sensitive|personal-data`
+
+Additional v1.1 CSV columns support structured identifiers, typed relations, and technical
+metadata when you need richer archival description.
 
 ### Exporting to CSV
 
@@ -253,7 +261,7 @@ my-archive/
 
 - 📖 Read the [Field Guide](field-guide.md) for detailed field definitions
 - 📋 Review [Best Practices](best-practices.md) for quality metadata
-- 🔗 Explore the [JSON-LD context](../schema/dms.jsonld) for linked data integration
+- 🔗 Explore the [JSON-LD context](../dms/data/schema/dms.jsonld) for linked data integration
 - 🤝 See [CONTRIBUTING.md](../CONTRIBUTING.md) to help improve DMS
 
 ---

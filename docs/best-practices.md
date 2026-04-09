@@ -33,6 +33,7 @@ Think about how someone might search for this item. Include the terms they would
 - Use the same format for similar items
 - Apply tags consistently across records
 - Follow the same naming conventions for locations and areas
+- Reuse the same preferred subject terms instead of near-duplicates
 
 ---
 
@@ -77,13 +78,19 @@ Descriptions should tell the story behind the item. A good description answers:
 
 Tags are keywords that help people discover your record. Follow these guidelines:
 
+Think taxonomy-first: AP's metadata model shows the value of consistent, reusable
+terms. DMS can apply the same principle at a community scale by keeping a shared list
+of preferred labels for subjects, places, themes, and people groups.
+
 ### Do:
 - Use **3–10 tags** per record
+- Prefer terms from a shared vocabulary before inventing a new label
 - Include both **broad** terms ("oral history") and **specific** terms ("Congo")
 - Add **cultural** terms where appropriate
 - Use **lowercase** for consistency
 
 ### Don't:
+- Mix near-duplicates such as "dr congo", "drc", and "congo" for the same concept
 - Repeat information already in the title
 - Use overly broad tags alone ("important", "good")
 - Use abbreviations without explanation
@@ -98,6 +105,10 @@ Tags are keywords that help people discover your record. Follow these guidelines
 | Location | market, school, community center |
 | People | women, youth, elders |
 | Time | 2024, early settlement era |
+
+When a new concept is genuinely needed, add it deliberately and then reuse that same
+label across future records. This creates a small but reliable local taxonomy instead
+of a drifting list of one-off keywords.
 
 ---
 
@@ -152,6 +163,12 @@ When in doubt, use **CC-BY-NC-4.0** — it protects the community's rights while
 - ⚠️ **Respect cultural sensitivity** — some heritage items may not be appropriate for public sharing
 - ⚠️ **Credit creators** — always list the original creator(s) and their roles
 
+When possible, use the richer v1.1 rights fields to document review context:
+
+- Set `consent_status` explicitly when consent has been obtained, is pending, or is unknown
+- Add `sensitivity` markers for issues such as trauma, sacred knowledge, minors, or personal data
+- Use `access_note` to explain why a record is restricted or how it should be reused safely
+
 ---
 
 ## Working with Oral Histories
@@ -163,6 +180,8 @@ Oral histories require special care:
 3. **Note the format** — specify whether it's a transcription (`text/plain`) or audio recording (`audio/mpeg`)
 4. **Respect the narrator's wishes** — set access level as agreed with the narrator
 5. **Preserve context** — describe the circumstances of the interview in the description
+6. **Capture the relationship** — if a transcript, translation, or derivative exists, use `relation_detail` to record how the items are connected
+7. **Record fixity when available** — for preservation copies, add checksums and file metadata in `technical`
 
 ---
 
@@ -175,6 +194,7 @@ When entering multiple records at once:
 3. Use `|` (pipe) to separate multiple values in a single column
    - Creator names: `Marie Consolée|Jean-Baptiste Mushimiyimana`
    - Subject tags: `oral history|displacement|Congo`
+   - Sensitivity tags: `trauma-sensitive|personal-data`
 4. Run `dms convert csv2json your-batch.csv` to create JSON records
 5. Validate with `dms validate --dir output/`
 
@@ -190,7 +210,10 @@ Before submitting a record, verify:
 - [ ] Language code is correct
 - [ ] Creator(s) are listed with correct roles
 - [ ] At least 3 subject tags are included
+- [ ] Structured identifiers are added where local authority records exist
 - [ ] Location is specified (at minimum, the place name)
 - [ ] Rights and access level are set appropriately
 - [ ] Consent has been obtained from all people featured
+- [ ] Technical metadata is added for preservation files when available
+- [ ] Typed relations are recorded for transcripts, translations, and derivatives
 - [ ] The record validates: `dms validate your-record.json`

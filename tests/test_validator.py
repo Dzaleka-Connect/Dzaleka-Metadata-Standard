@@ -246,6 +246,73 @@ class TestValidateRecord:
         errors = validate_record(record)
         assert len(errors) > 0
 
+    def test_valid_typed_relation(self):
+        """A typed relation should validate when target and type are present."""
+        record = {
+            "id": "b3e7c8a1-4d5f-6e7a-8b9c-0d1e2f3a4b5c",
+            "title": "Test",
+            "type": "story",
+            "description": "A test record.",
+            "language": "en",
+            "relation_detail": [
+                {
+                    "target": "urn:dms:source-recording:test",
+                    "relation_type": "transcription_of",
+                }
+            ],
+        }
+        errors = validate_record(record)
+        assert errors == [], f"Expected no errors, got: {errors}"
+
+    def test_invalid_typed_relation_type(self):
+        """An unknown relation_type should fail."""
+        record = {
+            "id": "b3e7c8a1-4d5f-6e7a-8b9c-0d1e2f3a4b5c",
+            "title": "Test",
+            "type": "story",
+            "description": "A test record.",
+            "language": "en",
+            "relation_detail": [
+                {
+                    "target": "urn:dms:source-recording:test",
+                    "relation_type": "linked_to",
+                }
+            ],
+        }
+        errors = validate_record(record)
+        assert len(errors) > 0
+
+    def test_invalid_technical_metadata(self):
+        """Negative technical values should fail."""
+        record = {
+            "id": "b3e7c8a1-4d5f-6e7a-8b9c-0d1e2f3a4b5c",
+            "title": "Test",
+            "type": "audio",
+            "description": "A test record.",
+            "language": "en",
+            "technical": {
+                "file_size_bytes": -1,
+                "duration_seconds": -10,
+            },
+        }
+        errors = validate_record(record)
+        assert len(errors) > 0
+
+    def test_invalid_rights_consent_status(self):
+        """An unknown consent_status should fail."""
+        record = {
+            "id": "b3e7c8a1-4d5f-6e7a-8b9c-0d1e2f3a4b5c",
+            "title": "Test",
+            "type": "story",
+            "description": "A test record.",
+            "language": "en",
+            "rights": {
+                "consent_status": "maybe",
+            },
+        }
+        errors = validate_record(record)
+        assert len(errors) > 0
+
 
 class TestValidateFile:
     """Tests for validate_file()."""
