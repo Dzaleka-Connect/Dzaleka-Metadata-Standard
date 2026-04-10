@@ -78,8 +78,8 @@ Descriptions should tell the story behind the item. A good description answers:
 
 Tags are keywords that help people discover your record. Follow these guidelines:
 
-Think taxonomy-first: AP's metadata model shows the value of consistent, reusable
-terms. DMS can apply the same principle at a community scale by keeping a shared list
+Think taxonomy-first: consistent, reusable terms make records easier to find and manage.
+DMS can apply that principle at a community scale by keeping a shared list
 of preferred labels for subjects, places, themes, and people groups.
 
 ### Do:

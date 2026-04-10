@@ -17,9 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Schema**: Optional consent/sensitivity metadata under `rights`, plus creator, place, and collection identifiers
 - **CLI**: Interactive generator prompts for structured subject references, technical metadata, consent/sensitivity, and typed relations
 - **CLI**: CSV conversion support for new v1.1 fields
-- **Docs**: Semantic Tagging guide with AP-inspired recommendations for building a community-managed taxonomy
-- **Docs**: Semantic Tagging guide now includes AP developer-guide concepts such as authorities, stable identifiers, deprecations, mappings, and relevance-aware future tooling
-- **Docs**: Semantic Tagging guide now incorporates AP ontology patterns such as SKOS labels/matches, change notes, and geography/organization/person relationship modeling
+- **API**: Local taxonomy service for vocabularies, subsets, deprecated terms, change logs, structure summaries, and JSON-LD/Turtle/RDF/XML output
+- **Docs**: Semantic Tagging guide with DMS-native recommendations for building a community-managed taxonomy
+- **Docs**: Semantic Tagging guide now covers authorities, stable identifiers, deprecations, mappings, and relevance-aware future tooling
+- **Docs**: Semantic Tagging guide now includes SKOS labels/matches, change notes, and geography/organization/person relationship modeling
+- **Docs**: Taxonomy API guide for local vocabulary endpoints and semantic-web formats
 - **Docs**: Stronger guidance in the Field Guide and Best Practices on canonical subject terms and tag governance
 - **Examples**: Refreshed story and fixture examples showing v1.1 structured metadata patterns
 

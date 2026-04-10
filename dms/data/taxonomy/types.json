@@ -1,0 +1,132 @@
+{
+  "@context": {
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "dms": "https://github.com/Dzaleka-Connect/Dzaleka-Metadata-Standard/dms/data/schema#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "id": "@id",
+    "type": "@type",
+    "label": "skos:prefLabel",
+    "definition": "skos:definition",
+    "note": "skos:scopeNote",
+    "history": "skos:historyNote",
+    "deprecated": "owl:deprecated",
+    "mapping": "skos:exactMatch"
+  },
+  "id": "dms:HeritageTypes",
+  "type": "skos:ConceptScheme",
+  "label": "Dzaleka Heritage Item Types",
+  "definition": "The primary classification of heritage items within the Dzaleka Metadata Standard.",
+  "hasTopConcept": [
+    {
+      "id": "dms:type/story",
+      "type": "skos:Concept",
+      "label": "Story",
+      "definition": "Narrative accounts, oral histories, or literary prose.",
+      "altLabel": [
+        "oral history"
+      ],
+      "mapping": "schema:Article"
+    },
+    {
+      "id": "dms:type/photo",
+      "type": "skos:Concept",
+      "label": "Photograph",
+      "definition": "Still images captured through photography.",
+      "altLabel": [
+        "photo"
+      ],
+      "mapping": "schema:Photograph"
+    },
+    {
+      "id": "dms:type/document",
+      "type": "skos:Concept",
+      "label": "Digital Document",
+      "definition": "Text-based files, reports, or records.",
+      "mapping": "schema:DigitalDocument"
+    },
+    {
+      "id": "dms:type/audio",
+      "type": "skos:Concept",
+      "label": "Audio Recording",
+      "definition": "Sound recordings, music, or interviews without video.",
+      "mapping": "schema:AudioObject"
+    },
+    {
+      "id": "dms:type/video",
+      "type": "skos:Concept",
+      "label": "Video Recording",
+      "definition": "Moving images with or without sound.",
+      "mapping": "schema:VideoObject"
+    },
+    {
+      "id": "dms:type/event",
+      "type": "skos:Concept",
+      "label": "Event",
+      "definition": "Historical or cultural happenings, ceremonies, or gatherings.",
+      "mapping": "schema:Event"
+    },
+    {
+      "id": "dms:type/map",
+      "type": "skos:Concept",
+      "label": "Map",
+      "definition": "Cartographic representations of the camp or surrounding areas.",
+      "mapping": "schema:Map"
+    },
+    {
+      "id": "dms:type/artwork",
+      "type": "skos:Concept",
+      "label": "Visual Artwork",
+      "definition": "Paintings, drawings, or other visual creations (non-photo).",
+      "mapping": "schema:VisualArtwork"
+    },
+    {
+      "id": "dms:type/site",
+      "type": "skos:Concept",
+      "label": "Heritage Site",
+      "definition": "Physical locations, buildings, or landmarks of significance.",
+      "mapping": "schema:Place"
+    },
+    {
+      "id": "dms:type/poem",
+      "type": "skos:Concept",
+      "label": "Poem",
+      "definition": "Literary works in verse or poetic form.",
+      "mapping": "schema:CreativeWork"
+    }
+  ],
+  "history": [
+    "2024-03-15: Initial release of heritage types.",
+    "2024-04-10: Expanded artwork definition.",
+    "2024-04-10: Deprecated 'image' in favor of 'photo' and 'artwork'."
+  ],
+  "changeLog": [
+    {
+      "date": "2024-03-15",
+      "message": "Initial release of heritage types."
+    },
+    {
+      "date": "2024-04-10",
+      "term_id": "artwork",
+      "message": "Expanded the artwork definition to better cover non-photographic visual works."
+    },
+    {
+      "date": "2024-04-10",
+      "term_id": "image",
+      "message": "Deprecated 'image' in favor of more specific terms."
+    }
+  ],
+  "deprecated": [
+    {
+      "id": "dms:type/image",
+      "type": "skos:Concept",
+      "label": "Image",
+      "definition": "Generic image term (deprecated).",
+      "mapping": "schema:ImageObject",
+      "changeNote": [
+        "Replaced by the more specific DMS terms 'photo' and 'artwork'."
+      ],
+      "supersededBy": "dms:type/photo"
+    }
+  ]
+}

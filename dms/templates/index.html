@@ -196,7 +196,18 @@
     /* ─── Creators List ─── */
     .creator-entry {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr auto;
+      grid-template-columns: 1.2fr 1fr 1fr 1fr auto;
+      gap: 1rem;
+      align-items: end;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: #fafafa;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .detail-entry {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr 1.2fr auto;
       gap: 1rem;
       align-items: end;
       margin-bottom: 1rem;
@@ -212,6 +223,34 @@
       color: var(--text-muted); cursor: pointer; transition: 0.15s;
     }
     .btn-icon:hover { border-color: #fca5a5; color: var(--error); background: #fef2f2; }
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+    .check-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.75rem 0.85rem;
+      background: #fafafa;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.84rem;
+      color: var(--text-dim);
+    }
+    .check-option input {
+      width: auto;
+      margin-top: 0.15rem;
+      flex: 0 0 auto;
+    }
+    .check-option strong {
+      display: block;
+      color: var(--text);
+      margin-bottom: 0.15rem;
+      font-size: 0.84rem;
+    }
 
     /* ─── Tags/Chips ─── */
     .tags-input {
@@ -228,6 +267,234 @@
     }
     .tag button { background: none; border: none; color: inherit; cursor: pointer; opacity: 0.7; }
     .tag button:hover { opacity: 1; }
+
+    .taxonomy-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+      align-items: start;
+    }
+    .subpanel {
+      background: #fafafa;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .subpanel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 1rem;
+      margin-bottom: 0.9rem;
+    }
+    .subpanel-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .subpanel-copy {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+      line-height: 1.4;
+    }
+    .subject-ref-list, .taxonomy-results {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .subject-ref-card, .taxonomy-term {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.9rem 1rem;
+    }
+    .subject-ref-card.deprecated, .taxonomy-term.deprecated {
+      border-color: #f59e0b;
+      background: #fffaf0;
+    }
+    .item-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 0.75rem;
+      margin-bottom: 0.45rem;
+    }
+    .item-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .item-subtitle {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-top: 0.2rem;
+      word-break: break-all;
+    }
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      justify-content: flex-end;
+    }
+    .taxonomy-badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 9999px;
+      padding: 0.15rem 0.55rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      line-height: 1.3;
+      background: #f3f4f6;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+    }
+    .taxonomy-badge.deprecated {
+      background: #fff7ed;
+      color: #b45309;
+      border-color: #fdba74;
+    }
+    .taxonomy-badge.live {
+      background: #ecfdf5;
+      color: #047857;
+      border-color: #6ee7b7;
+    }
+    .taxonomy-badge.meta {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-color: #bfdbfe;
+    }
+    .item-body {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+    .item-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.8rem;
+    }
+    .btn-small {
+      padding: 0.42rem 0.85rem;
+      font-size: 0.8rem;
+    }
+    .taxonomy-controls {
+      display: grid;
+      grid-template-columns: minmax(160px, 220px) minmax(0, 1fr);
+      gap: 0.85rem;
+      margin-bottom: 0.85rem;
+    }
+    .taxonomy-controls .form-group,
+    .taxonomy-search-group {
+      margin-bottom: 0;
+    }
+    .taxonomy-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 0.9rem;
+    }
+    .checkbox-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      cursor: pointer;
+    }
+    .checkbox-inline input {
+      width: auto;
+      margin: 0;
+    }
+    .taxonomy-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 0.9rem;
+    }
+    .taxonomy-metric {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.7rem 0.8rem;
+    }
+    .taxonomy-metric .value {
+      display: block;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.1;
+      margin-bottom: 0.15rem;
+    }
+    .taxonomy-metric .label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+    .taxonomy-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.9rem;
+    }
+    .mini-link {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 9999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 0.3rem 0.7rem;
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+    .mini-link:hover {
+      border-color: var(--border-hover);
+      color: var(--text);
+      background: #f9fafb;
+    }
+    .notice-panel {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: #fff;
+      padding: 0.9rem 1rem;
+      margin-bottom: 0.9rem;
+      font-size: 0.84rem;
+      color: var(--text-dim);
+    }
+    .notice-panel.warning {
+      border-color: #fdba74;
+      background: #fff7ed;
+      color: #9a3412;
+    }
+    .notice-panel h4 {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.45rem;
+      color: inherit;
+    }
+    .notice-panel ul {
+      padding-left: 1.15rem;
+      margin-top: 0.35rem;
+    }
+    .empty-inline {
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 0.9rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      text-align: center;
+    }
 
     /* ─── Validation Panel ─── */
     .validation-panel { margin-top: 1.5rem; padding: 1rem; border-radius: var(--radius); font-size: 0.9rem; }
@@ -297,7 +564,8 @@
 
     /* ─── Responsive ──────────────────────────────────── */
     @media (max-width: 768px) {
-      .form-row, .creator-entry { grid-template-columns: 1fr; gap: 1rem; }
+      .form-row, .creator-entry, .detail-entry { grid-template-columns: 1fr; gap: 1rem; }
+      .taxonomy-layout, .taxonomy-controls { grid-template-columns: 1fr; }
       .header { flex-direction: column; padding: 1rem; gap: 1rem; }
       .container { padding: 1rem; margin: 1rem auto; }
       .form-section { padding: 1.25rem; }
@@ -419,6 +687,50 @@
               <input type="text" id="tags-field" placeholder="Add keywords like 'community'...">
             </div>
           </div>
+          <div id="deprecated-term-notices" class="notice-panel warning" style="display:none;"></div>
+          <div class="taxonomy-layout">
+            <div class="subpanel">
+              <div class="subpanel-header">
+                <div>
+                  <div class="subpanel-title">Structured Subject References</div>
+                  <div class="subpanel-copy">Attach stable DMS term identifiers to this record without replacing your human-readable tags.</div>
+                </div>
+              </div>
+              <div id="subject-ref-list" class="subject-ref-list">
+                <div class="empty-inline">No structured references have been added to this record yet.</div>
+              </div>
+            </div>
+            <div class="subpanel">
+              <div class="subpanel-header">
+                <div>
+                  <div class="subpanel-title">DMS Vocabulary Browser</div>
+                  <div class="subpanel-copy">Browse a DMS vocabulary, review change history, and add a term directly into <code>subject_ref</code>.</div>
+                </div>
+              </div>
+              <div class="taxonomy-controls">
+                <div class="form-group">
+                  <label>Vocabulary</label>
+                  <select id="taxonomy-vocabulary"></select>
+                </div>
+                <div class="form-group taxonomy-search-group">
+                  <label>Search Terms</label>
+                  <input type="text" id="taxonomy-search" placeholder="Search labels, IDs, and definitions">
+                </div>
+              </div>
+              <div class="taxonomy-toolbar">
+                <label class="checkbox-inline">
+                  <input type="checkbox" id="taxonomy-include-deprecated">
+                  Include deprecated terms
+                </label>
+              </div>
+              <div id="taxonomy-summary" class="taxonomy-meta"></div>
+              <div id="taxonomy-links" class="taxonomy-links"></div>
+              <div id="taxonomy-changes" class="notice-panel" style="display:none;"></div>
+              <div id="taxonomy-results" class="taxonomy-results">
+                <div class="empty-inline">Loading DMS vocabularies...</div>
+              </div>
+            </div>
+          </div>
         </section>
 
         <!-- Date & Location -->
@@ -443,9 +755,21 @@
               <input type="text" id="f-loc-name" value="Dzaleka Refugee Camp">
             </div>
             <div class="form-group">
+              <label>Location Identifier</label>
+              <span class="help-text">Stable local identifier or URI for a known place authority entry.</span>
+              <input type="text" id="f-loc-id" placeholder="e.g., urn:dms:place:market-area">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
               <label>Area / Sector</label>
               <span class="help-text">Specific area or section within the location.</span>
               <input type="text" id="f-loc-area" placeholder="e.g., Community Space">
+            </div>
+            <div class="form-group">
+              <label></label>
+              <span class="help-text">Use location identifiers when a place authority already exists.</span>
+              <input type="text" disabled value="Examples: urn:dms:place:section-a, urn:dms:place:community-center">
             </div>
           </div>
           <div class="form-row" data-types="site,event,mural,photo,artwork">
@@ -501,6 +825,25 @@
               <select id="f-access"></select>
             </div>
           </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Consent Status</label>
+              <span class="help-text">Status of consent for sharing or publishing identifiable material.</span>
+              <select id="f-consent-status"></select>
+            </div>
+            <div class="form-group">
+              <label>Safety / Access Note</label>
+              <span class="help-text">Explain restrictions, review context, or safe-use expectations.</span>
+              <textarea id="f-access-note" placeholder="Explain why this record is restricted or how it should be handled safely."></textarea>
+            </div>
+          </div>
+          <div class="form-row full">
+            <div class="form-group">
+              <label>Sensitivity Markers</label>
+              <span class="help-text">Mark issues such as trauma, personal data, minors, or culturally sensitive knowledge.</span>
+              <div id="rights-sensitivity-list" class="checkbox-grid"></div>
+            </div>
+          </div>
           <div class="form-row full" data-types="audio,video,photo,artwork,mural,document">
             <div class="form-group">
               <label>Rights Holder</label>
@@ -520,18 +863,98 @@
               <input type="text" id="f-src-collection" placeholder="e.g., Oral Histories 2024">
             </div>
             <div class="form-group">
+              <label>Collection Identifier</label>
+              <span class="help-text">Stable local identifier or URI for the collection.</span>
+              <input type="text" id="f-src-collection-id" placeholder="e.g., urn:dms:collection:oral-histories-2024">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
               <label>Original Format</label>
               <span class="help-text">Original format of the item before digitization.</span>
               <input type="text" id="f-src-format" placeholder="e.g., handwritten notebook, cassette tape">
             </div>
-          </div>
-          <div class="form-row full">
             <div class="form-group">
               <label>Source Contributor</label>
               <span class="help-text">Person or organization that contributed this item.</span>
               <input type="text" id="f-src-contributor" placeholder="Person or organization that provided original material">
             </div>
           </div>
+        </section>
+
+        <!-- Technical -->
+        <section class="form-section" data-types="audio,video,photo,document,artwork">
+          <h3>Technical File Metadata</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>File URI</label>
+              <span class="help-text">Canonical URI for the digital file when one exists.</span>
+              <input type="text" id="f-tech-uri" placeholder="https://example.org/files/story.mp3">
+            </div>
+            <div class="form-group">
+              <label>Filename</label>
+              <span class="help-text">Stored or published filename for the digital object.</span>
+              <input type="text" id="f-tech-filename" placeholder="story-recording-01.mp3">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Checksum</label>
+              <span class="help-text">Checksum value for fixity verification.</span>
+              <input type="text" id="f-tech-checksum" placeholder="sha256 digest">
+            </div>
+            <div class="form-group">
+              <label>Checksum Algorithm</label>
+              <span class="help-text">Algorithm used to generate the checksum.</span>
+              <select id="f-tech-checksum-algo"></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>File Size (Bytes)</label>
+              <span class="help-text">Size of the digital file in bytes.</span>
+              <input type="number" min="0" step="1" id="f-tech-size" placeholder="0">
+            </div>
+            <div class="form-group" data-types="audio,video">
+              <label>Duration (Seconds)</label>
+              <span class="help-text">Duration for audio or video files.</span>
+              <input type="number" min="0" step="any" id="f-tech-duration" placeholder="0">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" data-types="document">
+              <label>Page Count</label>
+              <span class="help-text">Number of pages for paginated documents.</span>
+              <input type="number" min="1" step="1" id="f-tech-pages" placeholder="1">
+            </div>
+            <div class="form-group" data-types="photo,video,artwork">
+              <label>Pixel Width</label>
+              <span class="help-text">Width of the digital representation in pixels.</span>
+              <input type="number" min="1" step="1" id="f-tech-width" placeholder="1920">
+            </div>
+          </div>
+          <div class="form-row" data-types="photo,video,artwork">
+            <div class="form-group">
+              <label>Pixel Height</label>
+              <span class="help-text">Height of the digital representation in pixels.</span>
+              <input type="number" min="1" step="1" id="f-tech-height" placeholder="1080">
+            </div>
+            <div class="form-group">
+              <label></label>
+              <span class="help-text">Leave fields blank when technical metadata is not yet known.</span>
+              <input type="text" disabled value="Technical fields are optional but strongly recommended for preservation.">
+            </div>
+          </div>
+        </section>
+
+        <!-- Typed Relations -->
+        <section class="form-section">
+          <h3>Typed Relationships</h3>
+          <span class="help-text">Describe how this item relates to other records or resources, such as transcripts, translations, digitizations, or versions.</span>
+          <div id="relation-detail-list"></div>
+          <button type="button" class="btn btn-secondary" onclick="addRelationDetail()" style="margin-top:0.5rem">
+            + Add Typed Relation
+          </button>
         </section>
 
         <!-- Actions -->
@@ -637,6 +1060,16 @@
     let tags = [];
     let currentMode = 'create';
     let currentRecordId = null;
+    let taxonomySearchTimer = null;
+    const taxonomyState = {
+      vocabularies: [],
+      selectedRefs: [],
+      structures: {},
+      changeLogs: {},
+      deprecated: {},
+      currentTerms: [],
+      currentVocabulary: '',
+    };
 
     // ─── Init ─────────────────────────────────────────
     async function init() {
@@ -659,8 +1092,29 @@
           accessSelect.appendChild(opt);
         });
 
+        const consentSelect = document.getElementById('f-consent-status');
+        consentSelect.innerHTML = '<option value="">Select Consent Status…</option>';
+        (schema.consent_statuses || []).forEach(status => {
+          const opt = document.createElement('option');
+          opt.value = status;
+          opt.textContent = humanizeTerm(status);
+          consentSelect.appendChild(opt);
+        });
+
+        const checksumSelect = document.getElementById('f-tech-checksum-algo');
+        checksumSelect.innerHTML = '<option value="">Select Algorithm…</option>';
+        (schema.checksum_algorithms || []).forEach(algorithm => {
+          const opt = document.createElement('option');
+          opt.value = algorithm;
+          opt.textContent = algorithm.toUpperCase();
+          checksumSelect.appendChild(opt);
+        });
+
+        renderSensitivityOptions();
+
         document.getElementById('f-date-created').value = new Date().toISOString().split('T')[0];
         addCreator();
+        await initTaxonomyBrowser();
         updateVisibility();
       } catch (e) {
         showToast('Failed to connect to DMS core.', 'error');
@@ -703,6 +1157,11 @@
           <input type="text" class="creator-name" placeholder="E.g. John Doe">
         </div>
         <div class="form-group">
+          <label>Creator Identifier</label>
+          <span class="help-text">Stable local identifier or URI when an authority entry exists.</span>
+          <input type="text" class="creator-id" placeholder="urn:dms:creator:jane-doe">
+        </div>
+        <div class="form-group">
           <label>Role / Function</label>
           <span class="help-text">Role of the creator in producing this item.</span>
           <select class="creator-role">${roleOptions}</select>
@@ -715,6 +1174,426 @@
         <button type="button" class="btn-icon" onclick="this.parentElement.remove()" title="Remove">✕</button>
       `;
       list.appendChild(div);
+    }
+
+    function renderSensitivityOptions() {
+      const container = document.getElementById('rights-sensitivity-list');
+      if (!container) return;
+      container.innerHTML = (schema.sensitivity_values || []).map(value => {
+        return `
+          <label class="check-option">
+            <input type="checkbox" value="${escapeHtml(value)}" class="rights-sensitivity">
+            <span>
+              <strong>${escapeHtml(humanizeTerm(value))}</strong>
+              ${escapeHtml(value)}
+            </span>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function addRelationDetail(existing = {}) {
+      const list = document.getElementById('relation-detail-list');
+      const div = document.createElement('div');
+      div.className = 'detail-entry';
+
+      let relationOptions = '<option value="">Select Relation Type…</option>';
+      (schema.relation_types || []).forEach(type => {
+        relationOptions += `<option value="${type}">${humanizeTerm(type)}</option>`;
+      });
+
+      div.innerHTML = `
+        <div class="form-group">
+          <label>Target Identifier</label>
+          <span class="help-text">UUID or URI for the related record or external resource.</span>
+          <input type="text" class="relation-target" placeholder="urn:dms:source-recording:test">
+        </div>
+        <div class="form-group">
+          <label>Relation Type</label>
+          <span class="help-text">Nature of the relationship.</span>
+          <select class="relation-type">${relationOptions}</select>
+        </div>
+        <div class="form-group">
+          <label>Related Label</label>
+          <span class="help-text">Human-readable label for the related resource.</span>
+          <input type="text" class="relation-label" placeholder="Original recording">
+        </div>
+        <div class="form-group">
+          <label>Relation Note</label>
+          <span class="help-text">Clarify why the relationship matters.</span>
+          <input type="text" class="relation-note" placeholder="Transcript prepared from field recording">
+        </div>
+        <button type="button" class="btn-icon" onclick="this.parentElement.remove()" title="Remove">✕</button>
+      `;
+
+      list.appendChild(div);
+      div.querySelector('.relation-target').value = existing.target || '';
+      div.querySelector('.relation-type').value = existing.relation_type || '';
+      div.querySelector('.relation-label').value = existing.label || '';
+      div.querySelector('.relation-note').value = existing.note || '';
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function humanizeTerm(value) {
+      const raw = String(value ?? '');
+      const shortValue = raw.includes('/') ? raw.split('/').pop() : raw.includes(':') ? raw.split(':').pop() : raw;
+      return shortValue
+        .replace(/[_-]+/g, ' ')
+        .replace(/\b\w/g, letter => letter.toUpperCase());
+    }
+
+    function shortTermId(identifier) {
+      const raw = String(identifier ?? '');
+      return raw.includes('/') ? raw.split('/').pop() : raw.includes(':') ? raw.split(':').pop() : raw;
+    }
+
+    function inferVocabularyFromIdentifier(identifier) {
+      const raw = String(identifier ?? '');
+      if (raw.includes('type/')) return 'types';
+      if (raw.includes('role/')) return 'roles';
+      if (raw.includes('access/')) return 'access_levels';
+      if (raw.includes('relation-type/')) return 'relation_types';
+      if (raw.includes('consent/')) return 'consent_statuses';
+      if (raw.includes('sensitivity/')) return 'sensitivity_markers';
+      return '';
+    }
+
+    function getReplacementLabel(identifier) {
+      if (!identifier) return '';
+      return humanizeTerm(shortTermId(identifier));
+    }
+
+    function lookupDeprecatedTerm(identifier, label = '', vocabulary = '') {
+      const vocabularies = vocabulary ? [vocabulary] : Object.keys(taxonomyState.deprecated);
+      const normalizedLabel = String(label || '').trim().toLowerCase();
+      const normalizedIdentifier = String(identifier || '').trim().toLowerCase();
+
+      for (const vocab of vocabularies) {
+        const terms = taxonomyState.deprecated[vocab] || [];
+        const match = terms.find(term => {
+          const termId = String(term.id || '').toLowerCase();
+          const shortId = shortTermId(term.id || '').toLowerCase();
+          const termLabel = String(term.label || '').toLowerCase();
+          return normalizedIdentifier && (termId === normalizedIdentifier || shortId === normalizedIdentifier)
+            || normalizedLabel && termLabel === normalizedLabel
+            || normalizedLabel && shortId === normalizedLabel;
+        });
+        if (match) return { ...match, vocabulary: vocab };
+      }
+      return null;
+    }
+
+    function normalizeSubjectRef(ref) {
+      const vocabulary = ref.vocabulary || inferVocabularyFromIdentifier(ref.identifier) || '';
+      const deprecatedInfo = lookupDeprecatedTerm(ref.identifier, ref.label, vocabulary);
+      return {
+        identifier: ref.identifier,
+        label: ref.label || humanizeTerm(ref.identifier),
+        scheme: ref.scheme || taxonomyState.structures[vocabulary]?.label || vocabulary || 'DMS Vocabulary',
+        vocabulary,
+        deprecated: Boolean(ref.deprecated || deprecatedInfo),
+        supersededBy: ref.supersededBy || deprecatedInfo?.supersededBy || '',
+      };
+    }
+
+    async function initTaxonomyBrowser() {
+      const vocabularySelect = document.getElementById('taxonomy-vocabulary');
+      if (!vocabularySelect) return;
+
+      try {
+        const res = await fetch('/api/taxonomy');
+        const data = await res.json();
+        taxonomyState.vocabularies = Array.isArray(data.vocabularies) ? data.vocabularies : [];
+
+        vocabularySelect.innerHTML = taxonomyState.vocabularies.map(vocabulary => {
+          return `<option value="${escapeHtml(vocabulary)}">${escapeHtml(humanizeTerm(vocabulary))}</option>`;
+        }).join('');
+
+        if (taxonomyState.vocabularies.includes('types')) {
+          vocabularySelect.value = 'types';
+        }
+
+        taxonomyState.currentVocabulary = vocabularySelect.value || taxonomyState.vocabularies[0] || '';
+        await Promise.all([
+          preloadDeprecatedTerms(),
+          refreshTaxonomyBrowser(),
+        ]);
+        renderSubjectRefs();
+        renderDeprecatedWarnings();
+      } catch (e) {
+        document.getElementById('taxonomy-results').innerHTML = '<div class="empty-inline">Unable to load DMS vocabularies right now.</div>';
+      }
+    }
+
+    async function preloadDeprecatedTerms() {
+      const jobs = taxonomyState.vocabularies.map(async vocabulary => {
+        try {
+          const res = await fetch(`/api/taxonomy/${encodeURIComponent(vocabulary)}/deprecated`);
+          if (!res.ok) return;
+          taxonomyState.deprecated[vocabulary] = await res.json();
+        } catch (e) {}
+      });
+      await Promise.all(jobs);
+    }
+
+    async function ensureVocabularyMeta(vocabulary) {
+      if (!vocabulary) return;
+      if (!taxonomyState.structures[vocabulary]) {
+        const structureRes = await fetch(`/api/taxonomy/${encodeURIComponent(vocabulary)}/structure`);
+        if (structureRes.ok) {
+          taxonomyState.structures[vocabulary] = await structureRes.json();
+        }
+      }
+      if (!taxonomyState.changeLogs[vocabulary]) {
+        const changesRes = await fetch(`/api/taxonomy/${encodeURIComponent(vocabulary)}/changes`);
+        if (changesRes.ok) {
+          taxonomyState.changeLogs[vocabulary] = await changesRes.json();
+        }
+      }
+    }
+
+    async function refreshTaxonomyBrowser() {
+      const vocabulary = document.getElementById('taxonomy-vocabulary').value;
+      const search = document.getElementById('taxonomy-search').value.trim();
+      const includeDeprecated = document.getElementById('taxonomy-include-deprecated').checked;
+      if (!vocabulary) return;
+
+      taxonomyState.currentVocabulary = vocabulary;
+      document.getElementById('taxonomy-results').innerHTML = '<div class="empty-inline">Refreshing vocabulary terms...</div>';
+
+      try {
+        await ensureVocabularyMeta(vocabulary);
+
+        const params = new URLSearchParams();
+        if (search) params.set('q', search);
+        if (includeDeprecated) params.set('include_deprecated', 'true');
+        const url = `/api/taxonomy/${encodeURIComponent(vocabulary)}/terms${params.toString() ? `?${params.toString()}` : ''}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('taxonomy-search-failed');
+        const data = await res.json();
+        taxonomyState.currentTerms = Array.isArray(data.terms) ? data.terms : [];
+
+        renderTaxonomySummary(vocabulary);
+        renderTaxonomyLinks(vocabulary);
+        renderTaxonomyChanges(vocabulary);
+        renderTaxonomyResults(vocabulary);
+      } catch (e) {
+        document.getElementById('taxonomy-results').innerHTML = '<div class="empty-inline">Unable to retrieve this vocabulary right now.</div>';
+      }
+    }
+
+    function renderTaxonomySummary(vocabulary) {
+      const structure = taxonomyState.structures[vocabulary];
+      const summary = document.getElementById('taxonomy-summary');
+      if (!structure) {
+        summary.innerHTML = '';
+        return;
+      }
+
+      summary.innerHTML = `
+        <div class="taxonomy-metric">
+          <span class="value">${escapeHtml(humanizeTerm(structure.kind || 'flat'))}</span>
+          <span class="label">Structure</span>
+        </div>
+        <div class="taxonomy-metric">
+          <span class="value">${escapeHtml(structure.term_count ?? 0)}</span>
+          <span class="label">Active Terms</span>
+        </div>
+        <div class="taxonomy-metric">
+          <span class="value">${escapeHtml(structure.deprecated_term_count ?? 0)}</span>
+          <span class="label">Deprecated</span>
+        </div>
+        <div class="taxonomy-metric">
+          <span class="value">${escapeHtml((structure.available_formats || []).length)}</span>
+          <span class="label">Formats</span>
+        </div>
+      `;
+    }
+
+    function renderTaxonomyLinks(vocabulary) {
+      const links = document.getElementById('taxonomy-links');
+      if (!vocabulary) {
+        links.innerHTML = '';
+        return;
+      }
+
+      links.innerHTML = ['json', 'jsonld', 'ttl', 'rdfxml'].map(format => {
+        return `<a class="mini-link" href="/api/taxonomy/${encodeURIComponent(vocabulary)}?format=${format}" target="_blank" rel="noreferrer">${format.toUpperCase()}</a>`;
+      }).join('');
+    }
+
+    function renderTaxonomyChanges(vocabulary) {
+      const panel = document.getElementById('taxonomy-changes');
+      const changes = taxonomyState.changeLogs[vocabulary] || [];
+
+      if (!changes.length) {
+        panel.style.display = 'none';
+        panel.innerHTML = '';
+        return;
+      }
+
+      const recentChanges = changes.slice(0, 3).map(entry => {
+        const prefix = entry.date ? `${escapeHtml(entry.date)}: ` : '';
+        return `<li>${prefix}${escapeHtml(entry.message || '')}</li>`;
+      }).join('');
+
+      panel.style.display = '';
+      panel.innerHTML = `
+        <h4>Recent Vocabulary Changes</h4>
+        <ul>${recentChanges}</ul>
+      `;
+    }
+
+    function renderTaxonomyResults(vocabulary) {
+      const results = document.getElementById('taxonomy-results');
+      const terms = taxonomyState.currentTerms || [];
+
+      if (!terms.length) {
+        results.innerHTML = '<div class="empty-inline">No terms matched this vocabulary filter.</div>';
+        return;
+      }
+
+      results.innerHTML = terms.map(term => {
+        const shortId = shortTermId(term.id);
+        const added = taxonomyState.selectedRefs.some(ref => ref.identifier === term.id);
+        const badges = [
+          `<span class="taxonomy-badge meta">${escapeHtml(shortId)}</span>`,
+          `<span class="taxonomy-badge ${term.deprecated ? 'deprecated' : 'live'}">${term.deprecated ? 'Deprecated' : 'Active'}</span>`,
+        ].join('');
+        const replacement = term.supersededBy
+          ? `<div class="item-body" style="margin-top:0.45rem;">Prefer <strong>${escapeHtml(getReplacementLabel(term.supersededBy))}</strong> instead.</div>`
+          : '';
+
+        return `
+          <div class="taxonomy-term ${term.deprecated ? 'deprecated' : ''}">
+            <div class="item-head">
+              <div>
+                <div class="item-title">${escapeHtml(term.label || humanizeTerm(shortId))}</div>
+                <div class="item-subtitle">${escapeHtml(term.id)}</div>
+              </div>
+              <div class="badge-row">${badges}</div>
+            </div>
+            <div class="item-body">${escapeHtml(term.definition || 'No definition recorded for this term yet.')}</div>
+            ${replacement}
+            <div class="item-actions">
+              <button type="button" class="btn btn-secondary btn-small" onclick="addSubjectReferenceFromBrowser('${escapeHtml(vocabulary)}', '${encodeURIComponent(term.id)}')" ${added ? 'disabled' : ''}>
+                ${added ? 'Added to Record' : 'Add as Subject Ref'}
+              </button>
+              <a class="mini-link" href="/api/taxonomy/${encodeURIComponent(vocabulary)}/terms/${encodeURIComponent(shortId)}?format=html" target="_blank" rel="noreferrer">Open Term</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderSubjectRefs() {
+      const list = document.getElementById('subject-ref-list');
+      if (!taxonomyState.selectedRefs.length) {
+        list.innerHTML = '<div class="empty-inline">No structured references have been added to this record yet.</div>';
+        return;
+      }
+
+      list.innerHTML = taxonomyState.selectedRefs.map((ref, index) => {
+        return `
+          <div class="subject-ref-card ${ref.deprecated ? 'deprecated' : ''}">
+            <div class="item-head">
+              <div>
+                <div class="item-title">${escapeHtml(ref.label || humanizeTerm(ref.identifier))}</div>
+                <div class="item-subtitle">${escapeHtml(ref.identifier)}</div>
+              </div>
+              <div class="badge-row">
+                <span class="taxonomy-badge meta">${escapeHtml(ref.scheme || 'DMS Vocabulary')}</span>
+                <span class="taxonomy-badge ${ref.deprecated ? 'deprecated' : 'live'}">${ref.deprecated ? 'Deprecated' : 'Active'}</span>
+              </div>
+            </div>
+            <div class="item-body">Scheme: ${escapeHtml(ref.scheme || 'DMS Vocabulary')}</div>
+            ${ref.supersededBy ? `<div class="item-body" style="margin-top:0.35rem;">Replacement: <strong>${escapeHtml(getReplacementLabel(ref.supersededBy))}</strong></div>` : ''}
+            <div class="item-actions">
+              <button type="button" class="btn btn-danger btn-small" onclick="removeSubjectReference(${index})">Remove Reference</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addSubjectReferenceFromBrowser(vocabulary, encodedIdentifier) {
+      const identifier = decodeURIComponent(encodedIdentifier);
+      const term = taxonomyState.currentTerms.find(candidate => candidate.id === identifier);
+      if (!term) return;
+
+      const structure = taxonomyState.structures[vocabulary] || {};
+      const ref = normalizeSubjectRef({
+        identifier: term.id,
+        label: term.label,
+        scheme: structure.label || humanizeTerm(vocabulary),
+        vocabulary,
+        deprecated: term.deprecated,
+        supersededBy: term.supersededBy,
+      });
+
+      if (taxonomyState.selectedRefs.some(entry => entry.identifier === ref.identifier)) {
+        showToast('That structured reference is already attached to this record.', 'warning');
+        return;
+      }
+
+      taxonomyState.selectedRefs.push(ref);
+      renderSubjectRefs();
+      renderTaxonomyResults(vocabulary);
+      renderDeprecatedWarnings();
+
+      if (ref.deprecated) {
+        const replacement = ref.supersededBy ? ` Prefer ${getReplacementLabel(ref.supersededBy)} instead.` : '';
+        showToast(`Deprecated term added.${replacement}`, 'warning');
+      } else {
+        showToast(`Added ${ref.label} as a structured subject reference.`, 'success');
+      }
+    }
+
+    function removeSubjectReference(index) {
+      taxonomyState.selectedRefs.splice(index, 1);
+      renderSubjectRefs();
+      renderTaxonomyResults(taxonomyState.currentVocabulary);
+      renderDeprecatedWarnings();
+    }
+
+    function renderDeprecatedWarnings() {
+      const panel = document.getElementById('deprecated-term-notices');
+      const warnings = [];
+
+      tags.forEach(tag => {
+        const match = lookupDeprecatedTerm('', tag);
+        if (match) {
+          const replacement = match.supersededBy ? ` Use ${escapeHtml(getReplacementLabel(match.supersededBy))} instead.` : '';
+          warnings.push(`Tag "${escapeHtml(tag)}" matches a deprecated term in ${escapeHtml(match.vocabulary)}.${replacement}`);
+        }
+      });
+
+      taxonomyState.selectedRefs.forEach(ref => {
+        if (ref.deprecated) {
+          const replacement = ref.supersededBy ? ` Prefer ${escapeHtml(getReplacementLabel(ref.supersededBy))}.` : '';
+          warnings.push(`Structured reference "${escapeHtml(ref.label)}" is deprecated.${replacement}`);
+        }
+      });
+
+      if (!warnings.length) {
+        panel.style.display = 'none';
+        panel.innerHTML = '';
+        return;
+      }
+
+      panel.style.display = '';
+      panel.innerHTML = `
+        <h4>Deprecated Term Watch</h4>
+        <ul>${warnings.map(message => `<li>${message}</li>`).join('')}</ul>
+      `;
     }
 
     // ─── Tags ─────────────────────────────────────────
@@ -735,6 +1614,25 @@
           renderTags();
         }
       });
+
+      const vocabularyField = document.getElementById('taxonomy-vocabulary');
+      const searchField = document.getElementById('taxonomy-search');
+      const deprecatedToggle = document.getElementById('taxonomy-include-deprecated');
+
+      vocabularyField.addEventListener('change', () => {
+        refreshTaxonomyBrowser();
+      });
+
+      searchField.addEventListener('input', () => {
+        clearTimeout(taxonomySearchTimer);
+        taxonomySearchTimer = setTimeout(() => {
+          refreshTaxonomyBrowser();
+        }, 180);
+      });
+
+      deprecatedToggle.addEventListener('change', () => {
+        refreshTaxonomyBrowser();
+      });
     });
 
     function renderTags() {
@@ -747,6 +1645,7 @@
         span.innerHTML = `${tag} <button type="button" onclick="removeTag(${i})">✕</button>`;
         container.insertBefore(span, input);
       });
+      renderDeprecatedWarnings();
     }
 
     function removeTag(i) {
@@ -785,8 +1684,10 @@
         const name = entry.querySelector('.creator-name').value.trim();
         if (name) {
           const c = { name };
+          const identifier = entry.querySelector('.creator-id').value.trim();
           const role = entry.querySelector('.creator-role').value;
           const affil = entry.querySelector('.creator-affil').value.trim();
+          if (identifier) c.identifier = identifier;
           if (role) c.role = role;
           if (affil) c.affiliation = affil;
           creators.push(c);
@@ -801,17 +1702,30 @@
         if (dateCreated) record.date.created = dateCreated;
         if (dateEvent) record.date.event_date = dateEvent;
       }
+      if (currentMode === 'edit') {
+        record.date = record.date || {};
+        record.date.modified = new Date().toISOString().split('T')[0];
+      }
 
       if (tags.length) record.subject = [...tags];
+      if (taxonomyState.selectedRefs.length) {
+        record.subject_ref = taxonomyState.selectedRefs.map(ref => ({
+          identifier: ref.identifier,
+          label: ref.label,
+          scheme: ref.scheme,
+        }));
+      }
 
       const locName = document.getElementById('f-loc-name').value.trim();
+      const locIdentifier = document.getElementById('f-loc-id').value.trim();
       const locArea = document.getElementById('f-loc-area').value.trim();
       const locLat = document.getElementById('f-loc-lat').value;
       const locLon = document.getElementById('f-loc-lon').value;
       
-      if (locName || locArea || locLat || locLon) {
+      if (locName || locIdentifier || locArea || locLat || locLon) {
         record.location = {};
         if (locName) record.location.name = locName;
+        if (locIdentifier) record.location.identifier = locIdentifier;
         if (locArea) record.location.area = locArea;
         if (locLat) record.location.latitude = parseFloat(locLat);
         if (locLon) record.location.longitude = parseFloat(locLon);
@@ -819,22 +1733,73 @@
 
       const license = document.getElementById('f-license').value.trim();
       const access = document.getElementById('f-access').value;
+      const consentStatus = document.getElementById('f-consent-status').value;
+      const accessNote = document.getElementById('f-access-note').value.trim();
+      const sensitivityValues = Array.from(document.querySelectorAll('.rights-sensitivity:checked')).map(input => input.value);
       const holder = document.getElementById('f-rights-holder').value.trim();
-      if (license || access || holder) {
+      if (license || access || consentStatus || accessNote || sensitivityValues.length || holder) {
         record.rights = {};
         if (license) record.rights.license = license;
         if (access) record.rights.access_level = access;
+        if (consentStatus) record.rights.consent_status = consentStatus;
+        if (accessNote) record.rights.access_note = accessNote;
+        if (sensitivityValues.length) record.rights.sensitivity = sensitivityValues;
         if (holder) record.rights.holder = holder;
       }
 
       const srcCol = document.getElementById('f-src-collection').value.trim();
+      const srcColId = document.getElementById('f-src-collection-id').value.trim();
       const srcFmt = document.getElementById('f-src-format').value.trim();
       const srcCon = document.getElementById('f-src-contributor').value.trim();
-      if (srcCol || srcFmt || srcCon) {
+      if (srcCol || srcColId || srcFmt || srcCon) {
         record.source = {};
         if (srcCol) record.source.collection = srcCol;
+        if (srcColId) record.source.collection_identifier = srcColId;
         if (srcFmt) record.source.original_format = srcFmt;
         if (srcCon) record.source.contributor = srcCon;
+      }
+
+      const fileUri = document.getElementById('f-tech-uri').value.trim();
+      const filename = document.getElementById('f-tech-filename').value.trim();
+      const checksum = document.getElementById('f-tech-checksum').value.trim();
+      const checksumAlgorithm = document.getElementById('f-tech-checksum-algo').value;
+      const fileSize = document.getElementById('f-tech-size').value;
+      const duration = document.getElementById('f-tech-duration').value;
+      const pageCount = document.getElementById('f-tech-pages').value;
+      const width = document.getElementById('f-tech-width').value;
+      const height = document.getElementById('f-tech-height').value;
+      if (fileUri || filename || checksum || checksumAlgorithm || fileSize || duration || pageCount || width || height) {
+        record.technical = {};
+        if (fileUri) record.technical.file_uri = fileUri;
+        if (filename) record.technical.filename = filename;
+        if (checksum) record.technical.checksum = checksum;
+        if (checksumAlgorithm) record.technical.checksum_algorithm = checksumAlgorithm;
+        if (fileSize) record.technical.file_size_bytes = parseInt(fileSize, 10);
+        if (duration) record.technical.duration_seconds = parseFloat(duration);
+        if (pageCount) record.technical.page_count = parseInt(pageCount, 10);
+        if (width) record.technical.width_px = parseInt(width, 10);
+        if (height) record.technical.height_px = parseInt(height, 10);
+      }
+
+      const relationEntries = document.querySelectorAll('.detail-entry');
+      const relationDetails = [];
+      relationEntries.forEach(entry => {
+        const target = entry.querySelector('.relation-target').value.trim();
+        const relationType = entry.querySelector('.relation-type').value;
+        if (target && relationType) {
+          const detail = {
+            target,
+            relation_type: relationType,
+          };
+          const label = entry.querySelector('.relation-label').value.trim();
+          const note = entry.querySelector('.relation-note').value.trim();
+          if (label) detail.label = label;
+          if (note) detail.note = note;
+          relationDetails.push(detail);
+        }
+      });
+      if (relationDetails.length) {
+        record.relation_detail = relationDetails;
       }
 
       const covStart = document.getElementById('f-cov-start').value;
@@ -876,7 +1841,7 @@
         const data = await res.json();
         const panel = document.getElementById('validation-result');
 
-        if (data.valid) {
+        if (res.ok && data.valid) {
           let html = '<div class="validation-panel valid"><strong>✓ Schema Compliant</strong>';
           if (data.warnings && data.warnings.length) {
             html += '<ul>' + data.warnings.map(w => `<li class="warning-item">⚠ ${w}</li>`).join('') + '</ul>';
@@ -886,11 +1851,12 @@
           showToast('Schema validated successfully', 'success');
         } else {
           let html = '<div class="validation-panel invalid"><strong>✗ Non-Compliant Data</strong><ul>';
-          html += data.errors.map(e => `<li>${e.field}: ${e.message}</li>`).join('') + '</ul></div>';
+          const errors = Array.isArray(data.errors) ? data.errors : [{ field: 'Request', message: data.error || 'Validation failed.' }];
+          html += errors.map(e => `<li>${e.field}: ${e.message}</li>`).join('') + '</ul></div>';
           panel.innerHTML = html;
-          showToast('Validation failed', 'error');
+          showToast(data.error || 'Validation failed', 'error');
         }
-      } catch (e) { showToast('Network Error', 'error'); }
+      } catch (e) { showToast('Validation request failed', 'error'); }
     }
 
     async function saveRecord() {
@@ -903,17 +1869,25 @@
         const data = await res.json();
         if (data.saved) {
           showToast(`Artifact Archived: ${data.file}`, 'success');
-          document.getElementById('validation-result').innerHTML = ''; // Clear validated state
+          if (data.warnings && data.warnings.length) {
+            let html = '<div class="validation-panel valid"><strong>✓ Record saved with review notes</strong><ul>';
+            html += data.warnings.map(w => `<li class="warning-item">⚠ ${w}</li>`).join('');
+            html += '</ul></div>';
+            document.getElementById('validation-result').innerHTML = html;
+          } else {
+            document.getElementById('validation-result').innerHTML = '';
+          }
         } else {
           showToast(data.error || 'Failed to archive', 'error');
-          if (data.errors) {
-            const panel = document.getElementById('validation-result');
-            let html = '<div class="validation-panel invalid">✗ Schema Errors prevent saving<ul>';
-            html += data.errors.map(e => `<li>${e.field}: ${e.message}</li>`).join('') + '</ul></div>';
-            panel.innerHTML = html;
-          }
+          const panel = document.getElementById('validation-result');
+          let html = '<div class="validation-panel invalid">✗ Schema Errors prevent saving<ul>';
+          const errors = Array.isArray(data.errors) ? data.errors : [{ field: 'Request', message: data.error || 'Save failed.' }];
+          html += errors.map(e => `<li>${e.field}: ${e.message}</li>`).join('') + '</ul></div>';
+          panel.innerHTML = html;
         }
-      } catch (e) {}
+      } catch (e) {
+        showToast('Save request failed', 'error');
+      }
     }
 
     async function previewJSON() {
@@ -929,9 +1903,14 @@
           body: JSON.stringify(record),
         });
         const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Export failed');
+        }
         document.getElementById('json-output').innerHTML = syntaxHighlight(data);
         showToast('Generated Linked Data context', 'success');
-      } catch (e) {}
+      } catch (e) {
+        showToast(e.message || 'JSON-LD export failed', 'error');
+      }
     }
 
     function copyJSON() {
@@ -942,6 +1921,9 @@
     async function loadRecords() {
       try {
         const res = await fetch('/api/records');
+        if (!res.ok) {
+          throw new Error('Unable to load records');
+        }
         const records = await res.json();
         const list = document.getElementById('records-list');
         if (!records.length) {
@@ -979,7 +1961,14 @@
         
         renderDashboard(records);
 
-      } catch (e) {}
+      } catch (e) {
+        document.getElementById('records-list').innerHTML = `
+          <div class="validation-panel invalid">
+            <strong>✗ Could not load records</strong>
+            <p style="margin-top:0.75rem;">${escapeHtml(e.message || 'Please refresh the page or restart the local DMS server.')}</p>
+          </div>`;
+        showToast('Could not load records', 'error');
+      }
     }
 
     function renderDashboard(records) {
@@ -1064,9 +2053,30 @@
       document.getElementById('dms-form').reset();
       document.getElementById('f-date-created').value = new Date().toISOString().split('T')[0];
       document.getElementById('f-loc-name').value = 'Dzaleka Refugee Camp';
+      document.getElementById('f-loc-id').value = '';
       document.getElementById('f-license').value = 'CC-BY-4.0';
+      document.getElementById('f-consent-status').value = '';
+      document.getElementById('f-access-note').value = '';
+      document.querySelectorAll('.rights-sensitivity').forEach(input => { input.checked = false; });
+      document.getElementById('f-src-collection-id').value = '';
+      document.getElementById('f-tech-uri').value = '';
+      document.getElementById('f-tech-filename').value = '';
+      document.getElementById('f-tech-checksum').value = '';
+      document.getElementById('f-tech-checksum-algo').value = '';
+      document.getElementById('f-tech-size').value = '';
+      document.getElementById('f-tech-duration').value = '';
+      document.getElementById('f-tech-pages').value = '';
+      document.getElementById('f-tech-width').value = '';
+      document.getElementById('f-tech-height').value = '';
       tags = []; renderTags();
+      taxonomyState.selectedRefs = [];
+      document.getElementById('taxonomy-search').value = '';
+      document.getElementById('taxonomy-include-deprecated').checked = false;
+      renderSubjectRefs();
+      renderDeprecatedWarnings();
+      refreshTaxonomyBrowser();
       document.getElementById('creators-list').innerHTML = ''; addCreator();
+      document.getElementById('relation-detail-list').innerHTML = '';
       document.getElementById('validation-result').innerHTML = '';
       updateVisibility();
       showToast('Workspace initialized', 'success');
@@ -1098,11 +2108,13 @@
 
       if (r.location) {
         document.getElementById('f-loc-name').value = r.location.name || '';
+        document.getElementById('f-loc-id').value = r.location.identifier || '';
         document.getElementById('f-loc-area').value = r.location.area || '';
         document.getElementById('f-loc-lat').value = r.location.latitude || '';
         document.getElementById('f-loc-lon').value = r.location.longitude || '';
       } else {
         document.getElementById('f-loc-name').value = '';
+        document.getElementById('f-loc-id').value = '';
         document.getElementById('f-loc-area').value = '';
         document.getElementById('f-loc-lat').value = '';
         document.getElementById('f-loc-lon').value = '';
@@ -1111,21 +2123,53 @@
       if (r.rights) {
         document.getElementById('f-license').value = r.rights.license || '';
         document.getElementById('f-access').value = r.rights.access_level || 'public';
+        document.getElementById('f-consent-status').value = r.rights.consent_status || '';
+        document.getElementById('f-access-note').value = r.rights.access_note || '';
         document.getElementById('f-rights-holder').value = r.rights.holder || '';
+        document.querySelectorAll('.rights-sensitivity').forEach(input => {
+          input.checked = (r.rights.sensitivity || []).includes(input.value);
+        });
       } else {
         document.getElementById('f-license').value = '';
         document.getElementById('f-access').value = 'public';
+        document.getElementById('f-consent-status').value = '';
+        document.getElementById('f-access-note').value = '';
         document.getElementById('f-rights-holder').value = '';
+        document.querySelectorAll('.rights-sensitivity').forEach(input => { input.checked = false; });
       }
 
       if (r.source) {
         document.getElementById('f-src-collection').value = r.source.collection || '';
+        document.getElementById('f-src-collection-id').value = r.source.collection_identifier || '';
         document.getElementById('f-src-format').value = r.source.original_format || '';
         document.getElementById('f-src-contributor').value = r.source.contributor || '';
       } else {
         document.getElementById('f-src-collection').value = '';
+        document.getElementById('f-src-collection-id').value = '';
         document.getElementById('f-src-format').value = '';
         document.getElementById('f-src-contributor').value = '';
+      }
+
+      if (r.technical) {
+        document.getElementById('f-tech-uri').value = r.technical.file_uri || '';
+        document.getElementById('f-tech-filename').value = r.technical.filename || '';
+        document.getElementById('f-tech-checksum').value = r.technical.checksum || '';
+        document.getElementById('f-tech-checksum-algo').value = r.technical.checksum_algorithm || '';
+        document.getElementById('f-tech-size').value = r.technical.file_size_bytes || '';
+        document.getElementById('f-tech-duration').value = r.technical.duration_seconds || '';
+        document.getElementById('f-tech-pages').value = r.technical.page_count || '';
+        document.getElementById('f-tech-width').value = r.technical.width_px || '';
+        document.getElementById('f-tech-height').value = r.technical.height_px || '';
+      } else {
+        document.getElementById('f-tech-uri').value = '';
+        document.getElementById('f-tech-filename').value = '';
+        document.getElementById('f-tech-checksum').value = '';
+        document.getElementById('f-tech-checksum-algo').value = '';
+        document.getElementById('f-tech-size').value = '';
+        document.getElementById('f-tech-duration').value = '';
+        document.getElementById('f-tech-pages').value = '';
+        document.getElementById('f-tech-width').value = '';
+        document.getElementById('f-tech-height').value = '';
       }
 
       if (r.coverage) {
@@ -1140,6 +2184,8 @@
 
       tags = r.subject ? [...r.subject] : [];
       renderTags();
+      taxonomyState.selectedRefs = (r.subject_ref || []).map(ref => normalizeSubjectRef(ref));
+      renderSubjectRefs();
 
       const creList = document.getElementById('creators-list');
       creList.innerHTML = '';
@@ -1149,6 +2195,7 @@
           const entries = document.querySelectorAll('.creator-entry');
           const last = entries[entries.length - 1];
           last.querySelector('.creator-name').value = c.name || '';
+          last.querySelector('.creator-id').value = c.identifier || '';
           if (c.role) last.querySelector('.creator-role').value = c.role;
           last.querySelector('.creator-affil').value = c.affiliation || '';
         });
@@ -1156,7 +2203,15 @@
         addCreator();
       }
 
+      const relationList = document.getElementById('relation-detail-list');
+      relationList.innerHTML = '';
+      if (r.relation_detail && r.relation_detail.length > 0) {
+        r.relation_detail.forEach(detail => addRelationDetail(detail));
+      }
+
       document.getElementById('validation-result').innerHTML = '';
+      renderDeprecatedWarnings();
+      refreshTaxonomyBrowser();
       switchTab('create');
       updateVisibility();
       showToast('Loaded record for editing', 'success');
@@ -1178,7 +2233,8 @@
 
     function showToast(msg, type = 'success') {
       const toast = document.getElementById('toast');
-      toast.innerHTML = type === 'success' ? '✓ ' + msg : '✗ ' + msg;
+      const prefix = type === 'success' ? '✓ ' : type === 'warning' ? '⚠ ' : '✗ ';
+      toast.innerHTML = prefix + msg;
       toast.className = `toast ${type} show`;
       setTimeout(() => { toast.classList.remove('show'); }, 3000);
     }

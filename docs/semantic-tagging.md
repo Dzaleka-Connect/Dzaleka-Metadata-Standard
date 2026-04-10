@@ -1,21 +1,20 @@
 # Semantic Tagging for DMS
 
-> A practical guide for adapting AP-style semantic metadata ideas to the Dzaleka Metadata Standard.
+> A practical guide for building community-managed DMS vocabularies and semantic tagging.
 
 ---
 
 ## Why This Matters
 
-The Associated Press metadata service is useful as a reference because it combines two
-things that improve discovery:
+Strong discovery usually depends on two things working together:
 
 - a controlled taxonomy with stable preferred terms
 - a tagging service that applies those terms consistently across content
 
-DMS does not need AP's scale to benefit from the same approach. A smaller, community-led
+DMS does not need a massive central registry to benefit from the same approach. A smaller, community-led
 taxonomy can still improve search, browsing, reporting, and long-term consistency.
 
-The AP developer guide adds a few especially useful implementation ideas:
+The most useful implementation patterns are:
 
 - terms live in named authorities such as Subject, Geography, Organization, Person, and Company
 - terms have stable unique identifiers, preferred labels, and sometimes synonyms or related properties
@@ -39,7 +38,7 @@ The main opportunity is to make `subject` less ad hoc and more governed.
 
 ---
 
-## AP-Inspired Principles for DMS
+## DMS Vocabulary Principles
 
 ### 1. Prefer Controlled Terms Over One-Off Keywords
 
@@ -75,7 +74,7 @@ Good practice:
 - Record synonyms in documentation or a future taxonomy file
 - Use the preferred label in the record itself
 
-AP does this with unique identifiers plus preferred labels. DMS can start smaller by
+A strong vocabulary service does this with unique identifiers plus preferred labels. DMS can start smaller by
 maintaining canonical labels now, then add stable local IDs later without changing the
 basic meaning of the records.
 
@@ -93,19 +92,19 @@ Avoid turning a tag into a sentence or highly specific note that only fits one i
 
 ### 5. Treat Relationships as Metadata, Not Just Text
 
-AP emphasizes linked concepts. DMS can mirror that by:
+A good DMS vocabulary layer should emphasize linked concepts by:
 
 - linking related items through `relation`
 - using `location` consistently for named places
 - using `creator` for people and roles instead of burying names only in prose
 
-AP also separates distinct authorities such as people, places, organizations, and
-subjects. DMS already approximates this pattern through different fields even though
+DMS already approximates separate authorities for people, places, organizations, and
+subjects through different fields even though
 the current schema keeps `subject` itself as plain strings.
 
 ### 6. Plan for Governance, Not Just Entry
 
-One of the strongest lessons from the AP developer guide is that taxonomy quality comes
+One of the strongest lessons from real-world vocabulary work is that taxonomy quality comes
 from maintenance workflows, not just field definitions.
 
 Useful governance patterns for DMS:
@@ -120,8 +119,8 @@ Even a simple markdown or CSV registry can provide this benefit at small scale.
 
 ### 7. Separate Manual Description from Machine Assistance
 
-AP distinguishes between the taxonomy itself and the automated tagging service that
-applies it. DMS can follow the same separation:
+DMS should distinguish between the taxonomy itself and any future automated tagging
+service that applies it:
 
 - the vocabulary defines approved concepts
 - contributors choose terms manually today
@@ -182,9 +181,9 @@ This is small enough to manage manually while still creating much better consist
 
 ---
 
-## What to Borrow from AP First
+## What DMS Should Build First
 
-The AP system is much larger than DMS, but these ideas translate well immediately:
+These ideas translate well to DMS immediately:
 
 - Authority thinking: treat themes, places, people, organizations, and collections as separate concept groups
 - Preferred labels: use one canonical label for each recurring concept
@@ -192,15 +191,15 @@ The AP system is much larger than DMS, but these ideas translate well immediatel
 - Mappings: plan for mappings to outside vocabularies rather than replacing local language
 - Governance: maintain deprecations and a simple change history for vocabulary updates
 
-These are high-value even without building an API.
+These are high-value even before building more advanced tooling.
 
 ---
 
-## A Practical DMS Adaptation of AP Authorities
+## A Practical DMS Authority Model
 
-AP uses formal authorities. DMS can adapt the same idea with lightweight community rules:
+DMS can support lightweight authorities with community-managed rules:
 
-| AP authority idea | DMS equivalent today | Possible future improvement |
+| Authority area | DMS equivalent today | Possible future improvement |
 |---|---|---|
 | Subject | `subject` tags | Local subject taxonomy with stable IDs |
 | Geography | `location.name`, `location.area`, coordinates | Place authority file for camp and origin locations |
@@ -214,7 +213,7 @@ This structure fits DMS well because the schema already separates several entity
 
 ## Relevance and Confidence
 
-AP tagging results include relevance scores for matched concepts. DMS does not currently
+DMS tagging results could eventually include relevance scores for matched concepts, but DMS does not currently
 store confidence or relevance, which is reasonable for human-authored records.
 
 If DMS later adds automated tagging, consider keeping confidence outside the core record
@@ -224,8 +223,8 @@ or as optional workflow metadata so contributor-reviewed records remain authorit
 
 ## Deprecations and Change Tracking
 
-The AP guide exposes deprecated terms and vocabulary change logs through dedicated APIs.
-For DMS, the equivalent can be much simpler:
+A DMS vocabulary service should expose deprecated terms and vocabulary change logs through
+dedicated APIs. The first version can still stay simple:
 
 - maintain a `preferred_term -> deprecated aliases` list
 - note vocabulary changes in a changelog or taxonomy registry
@@ -237,8 +236,7 @@ This helps keep historical records understandable without forcing immediate rewr
 
 ## Mappings and Interoperability
 
-AP maps its subject taxonomy to external vocabularies such as the IAB Tech Lab Content
-Taxonomy. DMS can apply the same idea selectively:
+DMS can map its local subject taxonomy to outside vocabularies when useful:
 
 - preserve local Dzaleka-first terminology in the record
 - map those terms to external vocabularies in exports or documentation
@@ -251,10 +249,10 @@ without flattening community-specific meaning.
 
 ## Ontology Patterns Worth Reusing
 
-The AP ontology markdown files add another layer beyond the developer guide: they show how
-the taxonomy is modeled, not just how it is delivered.
+A strong ontology layer adds another level beyond delivery: it shows how the taxonomy is
+modeled, not just how it is published.
 
-Useful patterns from those ontology files include:
+Useful patterns include:
 
 - concept schemes and authorities for grouping terms
 - `skos:broader` and `skos:related` for hierarchy and associations
@@ -265,7 +263,7 @@ Useful patterns from those ontology files include:
 - `geo:lat` and `geo:long` for geographic authorities
 - organization and person relationships such as membership, affiliation, and associated place
 
-For DMS, the best takeaway is not to clone the AP ontology wholesale. It is to reuse the
+For DMS, the goal is not to clone anyone else's ontology wholesale. It is to reuse the
 same modeling habits for any future DMS taxonomy files.
 
 ---
@@ -298,7 +296,7 @@ If DMS later publishes managed vocabularies, a good lightweight pattern would be
 - change notes for renamed or deprecated terms
 - optional external matches to SKOS-compatible vocabularies
 
-This follows the strongest AP ontology ideas while staying proportionate to DMS.
+This follows strong SKOS-based vocabulary patterns while staying proportionate to DMS.
 
 ---
 

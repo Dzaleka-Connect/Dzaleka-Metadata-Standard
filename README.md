@@ -72,6 +72,8 @@ The easiest way to build, validate, and manage records is using the built-in loc
 dms web --port 8080 --dir records/
 ```
 
+This also exposes a local vocabulary API at `http://127.0.0.1:8080/api/taxonomy` for DMS term lookups, deprecations, change logs, and JSON-LD/Turtle/RDF/XML output.
+
 ### Create a Record via CLI
 
 ```bash
@@ -160,17 +162,22 @@ All fields map to [Dublin Core](https://www.dublincore.org/specifications/dublin
 │   ├── cli.py           Command entry points
 │   ├── validator.py     Schema validation engine
 │   ├── generator.py     Interactive record creator
-│   └── converter.py     CSV ↔ JSON converter
+│   ├── converter.py     CSV ↔ JSON converter
+│   └── taxonomy.py      Local vocabulary service and serializers
 │
 │   data/schema/         Schema definitions
 │   ├── dms.json         JSON Schema (Draft 2020-12)
 │   ├── dms.yaml         YAML version
 │   └── dms.jsonld       JSON-LD context for linked data
 │
+│   data/taxonomy/       DMS vocabulary files
+│   └── types.json       Curated heritage item type vocabulary
+│
 ├── docs/                Documentation
 │   ├── field-guide.md   Field definitions & guidelines
 │   ├── best-practices.md Metadata entry best practices
 │   ├── semantic-tagging.md Controlled vocabularies and richer subject metadata
+│   ├── taxonomy-api.md  Local vocabulary API endpoints and formats
 │   └── getting-started.md Installation & tutorial
 │
 ├── examples/            Sample records
@@ -205,7 +212,8 @@ The [`examples/`](examples/) directory contains sample records for common herita
 
 - **[Field Guide](docs/field-guide.md)** — Detailed definitions for every schema field
 - **[Best Practices](docs/best-practices.md)** — Guidelines for quality metadata entry
-- **[Semantic Tagging](docs/semantic-tagging.md)** — AP-inspired guidance for controlled vocabularies and richer subject metadata
+- **[Semantic Tagging](docs/semantic-tagging.md)** — DMS guidance for controlled vocabularies and richer subject metadata
+- **[Taxonomy API](docs/taxonomy-api.md)** — Query vocabularies, terms, deprecations, and semantic formats
 - **[Getting Started](docs/getting-started.md)** — Installation and first steps tutorial
 
 ## Interoperability

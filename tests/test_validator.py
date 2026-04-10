@@ -313,6 +313,117 @@ class TestValidateRecord:
         errors = validate_record(record)
         assert len(errors) > 0
 
+    def test_valid_managed_subject_reference(self):
+        """A managed DMS subject reference with matching label and scheme should pass."""
+        record = {
+            "id": "b3e7c8a1-4d5f-6e7a-8b9c-0d1e2f3a4b5c",
+            "title": "Test",
+            "type": "story",
+            "description": "A test record.",
+            "language": "en",
+            "subject_ref": [
+                {
+                    "identifier": "dms:type/story",
+                    "label": "Story",
+                    "scheme": "Dzaleka Heritage Item Types",
+                }
+            ],
+        }
+        errors = validate_record(record)
+        assert errors == [], f"Expected no errors, got: {errors}"
+
+    def test_unknown_managed_subject_reference_fails(self):
+        """Unknown managed DMS identifiers should be rejected."""
+        record = {
+            "id": "b3e7c8a1-4d5f-6e7a-8b9c-0d1e2f3a4b5c",
+            "title": "Test",
+            "type": "story",
+            "description": "A test record.",
+            "language": "en",
+            "subject_ref": [
+                {
+                    "identifier": "dms:type/not-real",
+                    "label": "Not Real",
+                    "scheme": "Dzaleka Heritage Item Types",
+                }
+            ],
+        }
+        errors = validate_record(record)
+        assert any("not defined" in error["message"] for error in errors)
+
+    def test_deprecated_managed_subject_reference_fails(self):
+        """Deprecated managed DMS identifiers should be rejected."""
+        record = {
+            "id": "b3e7c8a1-4d5f-6e7a-8b9c-0d1e2f3a4b5c",
+            "title": "Test",
+            "type": "story",
+            "description": "A test record.",
+            "language": "en",
+            "subject_ref": [
+                {
+                    "identifier": "dms:type/image",
+                    "label": "Image",
+                    "scheme": "Dzaleka Heritage Item Types",
+                }
+            ],
+        }
+        errors = validate_record(record)
+        assert any("deprecated" in error["message"] for error in errors)
+
+    def test_managed_subject_reference_scheme_mismatch_fails(self):
+        """Managed DMS references should reject the wrong scheme label."""
+        record = {
+            "id": "b3e7c8a1-4d5f-6e7a-8b9c-0d1e2f3a4b5c",
+            "title": "Test",
+            "type": "story",
+            "description": "A test record.",
+            "language": "en",
+            "subject_ref": [
+                {
+                    "identifier": "dms:type/story",
+                    "label": "Story",
+                    "scheme": "Wrong Scheme",
+                }
+            ],
+        }
+        errors = validate_record(record)
+        assert any("does not match the managed DMS vocabulary label" in error["message"] for error in errors)
+
+    def test_managed_subject_reference_label_mismatch_fails(self):
+        """Managed DMS references should reject a non-canonical label."""
+        record = {
+            "id": "b3e7c8a1-4d5f-6e7a-8b9c-0d1e2f3a4b5c",
+            "title": "Test",
+            "type": "story",
+            "description": "A test record.",
+            "language": "en",
+            "subject_ref": [
+                {
+                    "identifier": "dms:type/story",
+                    "label": "Oral History",
+                    "scheme": "Dzaleka Heritage Item Types",
+                }
+            ],
+        }
+        errors = validate_record(record)
+        assert any("does not match the canonical DMS label" in error["message"] for error in errors)
+
+    def test_duplicate_subject_references_fail(self):
+        """Duplicate subject reference identifiers should be rejected."""
+        record = {
+            "id": "b3e7c8a1-4d5f-6e7a-8b9c-0d1e2f3a4b5c",
+            "title": "Test",
+            "type": "story",
+            "description": "A test record.",
+            "language": "en",
+            "subject_ref": [
+                {"identifier": "dms:type/story"},
+                {"identifier": "dms:type/story"},
+            ],
+        }
+        errors = validate_record(record)
+        assert any(error["validator"] == "duplicate" for error in errors)
+
 
 class TestValidateFile:
     """Tests for validate_file()."""
@@ -379,7 +490,52 @@ class TestGetWarnings:
         assert any("Creator" in w for w in warnings)
 
     def test_full_record_no_warnings(self):
-        """A full record should have no warnings."""
+        """A fully populated record should only surface intentional review warnings."""
         record = json.loads(FIXTURES_DIR.joinpath("valid_record.json").read_text())
         warnings = get_warnings(record)
-        assert warnings == []
+        assert warnings == [
+            "Public access is set even though sensitivity markers are present. Confirm this is intentional."
+        ]
+
+    def test_warns_for_restricted_without_access_note(self):
+        """Restricted or community-only access should explain the restriction."""
+        record = {
+            "id": "test",
+            "title": "Test",
+            "type": "story",
+            "description": "Test",
+            "language": "en",
+            "rights": {
+                "access_level": "restricted",
+            },
+        }
+        warnings = get_warnings(record)
+        assert any("access note" in warning.lower() for warning in warnings)
+
+    def test_warns_for_checksum_without_algorithm(self):
+        """Checksums should include the algorithm used to produce them."""
+        record = {
+            "id": "test",
+            "title": "Test",
+            "type": "audio",
+            "description": "Test",
+            "language": "en",
+            "technical": {
+                "checksum": "abc123",
+            },
+        }
+        warnings = get_warnings(record)
+        assert any("checksum algorithm" in warning.lower() for warning in warnings)
+
+    def test_warns_for_deprecated_subject_tag(self):
+        """Deprecated free tags should still surface a review warning."""
+        record = {
+            "id": "test",
+            "title": "Test",
+            "type": "story",
+            "description": "Test",
+            "language": "en",
+            "subject": ["image"],
+        }
+        warnings = get_warnings(record)
+        assert any("deprecated term" in warning.lower() for warning in warnings)

@@ -111,3 +111,12 @@ def get_relation_types() -> list[str]:
     relation = defs.get("RelationDetail", {})
     relation_type_prop = relation.get("properties", {}).get("relation_type", {})
     return relation_type_prop.get("enum", [])
+
+
+def get_checksum_algorithms() -> list[str]:
+    """Return the list of valid checksum algorithms."""
+    schema = load_schema()
+    defs = schema.get("$defs", {})
+    technical = defs.get("Technical", {})
+    checksum_prop = technical.get("properties", {}).get("checksum_algorithm", {})
+    return checksum_prop.get("enum", [])

@@ -90,6 +90,125 @@ def _format_error(error: ValidationError) -> dict:
     }
 
 
+def _semantic_error(path: list, message: str, validator: str = "semantic") -> dict:
+    """Create a human-friendly semantic validation error."""
+    return {
+        "field": _humanize_path(path),
+        "message": message,
+        "validator": validator,
+        "path": ".".join(str(p) for p in path) if path else "$",
+    }
+
+
+def _find_deprecated_term_by_label(label: str) -> tuple[str, dict] | None:
+    """Look up a deprecated managed DMS term by preferred or short label."""
+    from dms.taxonomy import get_deprecated_terms, get_vocabulary_list
+
+    wanted = str(label or "").strip().lower()
+    if not wanted:
+        return None
+
+    for vocabulary in get_vocabulary_list():
+        for term in get_deprecated_terms(vocabulary):
+            term_label = str(term.get("label", "")).strip().lower()
+            full_id = str(term.get("id", "")).strip().lower()
+            short_id = str(term.get("id", "")).rsplit("/", 1)[-1].lower()
+            if wanted in {term_label, short_id, full_id}:
+                return vocabulary, term
+    return None
+
+
+def _validate_subject_references(record: dict) -> list[dict]:
+    """Validate managed DMS concept references beyond raw JSON Schema shape."""
+    from dms.taxonomy import (
+        get_term_info,
+        infer_vocabulary_from_identifier,
+        is_managed_dms_identifier,
+        load_taxonomy,
+    )
+
+    errors = []
+    seen_identifiers = set()
+
+    for index, ref in enumerate(record.get("subject_ref", [])):
+        identifier = str(ref.get("identifier", "")).strip()
+        if not identifier:
+            continue
+
+        if identifier in seen_identifiers:
+            errors.append(
+                _semantic_error(
+                    ["subject_ref", index, "identifier"],
+                    f"Duplicate subject reference '{identifier}' is not allowed.",
+                    validator="duplicate",
+                )
+            )
+            continue
+        seen_identifiers.add(identifier)
+
+        if not is_managed_dms_identifier(identifier):
+            continue
+
+        vocabulary = infer_vocabulary_from_identifier(identifier)
+        if vocabulary is None:
+            errors.append(
+                _semantic_error(
+                    ["subject_ref", index, "identifier"],
+                    f"Managed DMS identifier '{identifier}' does not map to a known DMS vocabulary.",
+                    validator="taxonomy",
+                )
+            )
+            continue
+
+        term = get_term_info(vocabulary, identifier)
+        if term is None:
+            errors.append(
+                _semantic_error(
+                    ["subject_ref", index, "identifier"],
+                    f"Managed DMS identifier '{identifier}' is not defined in the '{vocabulary}' vocabulary.",
+                    validator="taxonomy",
+                )
+            )
+            continue
+
+        if term.get("deprecated"):
+            replacement = str(term.get("supersededBy", "")).strip()
+            replacement_text = f" Use '{replacement}' instead." if replacement else ""
+            errors.append(
+                _semantic_error(
+                    ["subject_ref", index, "identifier"],
+                    f"Managed DMS identifier '{identifier}' is deprecated and cannot be used in new records.{replacement_text}",
+                    validator="taxonomy",
+                )
+            )
+            continue
+
+        provided_scheme = str(ref.get("scheme", "")).strip()
+        if provided_scheme:
+            expected_scheme = str(load_taxonomy(vocabulary).get("label", "")).strip()
+            if expected_scheme and provided_scheme != expected_scheme:
+                errors.append(
+                    _semantic_error(
+                        ["subject_ref", index, "scheme"],
+                        f"Scheme '{provided_scheme}' does not match the managed DMS vocabulary label '{expected_scheme}'.",
+                        validator="taxonomy",
+                    )
+                )
+
+        provided_label = str(ref.get("label", "")).strip()
+        expected_label = str(term.get("label", "")).strip()
+        if provided_label and expected_label and provided_label != expected_label:
+            errors.append(
+                _semantic_error(
+                    ["subject_ref", index, "label"],
+                    f"Label '{provided_label}' does not match the canonical DMS label '{expected_label}' for '{identifier}'.",
+                    validator="taxonomy",
+                )
+            )
+
+    return errors
+
+
 def validate_record(record: dict) -> list[dict]:
     """Validate a single DMS record against the schema.
 
@@ -103,7 +222,12 @@ def validate_record(record: dict) -> list[dict]:
     schema = load_schema()
     validator = Draft202012Validator(schema)
     errors = sorted(validator.iter_errors(record), key=lambda e: list(e.absolute_path))
-    return [_format_error(e) for e in errors]
+    formatted = [_format_error(e) for e in errors]
+    if formatted:
+        return formatted
+
+    semantic_errors = _validate_subject_references(record)
+    return formatted + semantic_errors
 
 
 def validate_file(filepath: str | Path) -> tuple[bool, list[dict]]:
@@ -184,6 +308,51 @@ def get_warnings(record: dict) -> list[str]:
         if field not in record:
             label = FIELD_LABELS.get(field, field)
             warnings.append(f"Recommended field '{label}' is not provided.")
+
+    rights = record.get("rights", {})
+    access_level = rights.get("access_level")
+    access_note = str(rights.get("access_note", "")).strip()
+    consent_status = rights.get("consent_status")
+    sensitivity = rights.get("sensitivity", [])
+    if access_level in {"restricted", "community-only"} and not access_note:
+        warnings.append("Restricted records should include a rights access note explaining the review or access context.")
+    if access_level == "public" and consent_status in {"pending", "unknown", "withheld"}:
+        warnings.append(
+            f"Access level is public while consent status is '{consent_status}'. Review rights before publishing."
+        )
+    if access_level == "public" and sensitivity:
+        warnings.append("Public access is set even though sensitivity markers are present. Confirm this is intentional.")
+
+    technical = record.get("technical", {})
+    checksum = str(technical.get("checksum", "")).strip()
+    checksum_algorithm = str(technical.get("checksum_algorithm", "")).strip()
+    if checksum and not checksum_algorithm:
+        warnings.append("Technical metadata includes a checksum but no checksum algorithm.")
+    if checksum_algorithm and not checksum:
+        warnings.append("Technical metadata includes a checksum algorithm but no checksum value.")
+
+    for ref in record.get("subject_ref", []):
+        identifier = str(ref.get("identifier", "")).strip()
+        if not identifier:
+            continue
+        deprecated_match = _find_deprecated_term_by_label(identifier)
+        if deprecated_match:
+            vocabulary, term = deprecated_match
+            replacement = term.get("supersededBy")
+            replacement_text = f" Use '{replacement}' instead." if replacement else ""
+            warnings.append(
+                f"Subject reference '{identifier}' points to a deprecated term in '{vocabulary}'.{replacement_text}"
+            )
+
+    for tag in record.get("subject", []):
+        deprecated_match = _find_deprecated_term_by_label(tag)
+        if deprecated_match:
+            vocabulary, term = deprecated_match
+            replacement = term.get("supersededBy")
+            replacement_text = f" Prefer '{replacement}' instead." if replacement else ""
+            warnings.append(
+                f"Subject tag '{tag}' matches a deprecated term in '{vocabulary}'.{replacement_text}"
+            )
     return warnings
 
 
