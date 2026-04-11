@@ -275,6 +275,11 @@
       margin-top: 1.25rem;
       align-items: start;
     }
+    .taxonomy-stack {
+      display: grid;
+      gap: 1rem;
+      align-items: start;
+    }
     .subpanel {
       background: #fafafa;
       border: 1px solid var(--border);
@@ -584,6 +589,7 @@
       <button class="tab active" data-tab="home" onclick="switchTab('home')">Home</button>
       <button class="tab" data-tab="dashboard" onclick="switchTab('dashboard')">Dashboard</button>
       <button class="tab" data-tab="create" onclick="switchTab('create')">Create</button>
+      <button class="tab" data-tab="vocabulary" onclick="switchTab('vocabulary')">Vocabulary</button>
       <button class="tab" data-tab="records" onclick="switchTab('records')">Records</button>
       <button class="tab" data-tab="preview" onclick="switchTab('preview')">Preview</button>
     </div>
@@ -609,6 +615,12 @@
             <h3 style="margin-bottom: 0.5rem; color: var(--text);">Browse Vault</h3>
             <div style="font-size: 2rem; margin-bottom: 1rem; font-family: ui-monospace, Consolas, monospace; color: #0f172a;">[ ◎ ]</div>
             <p class="text-dim" style="font-size:0.9rem; text-transform:none; font-weight:normal; letter-spacing:normal;">Examine or edit your local repository of stored records.</p>
+          </div>
+
+          <div class="stat-card" style="cursor:pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="switchTab('vocabulary')" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow)'" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 15px -3px rgba(0,0,0,0.1)'">
+            <h3 style="margin-bottom: 0.5rem; color: var(--text);">Vocabulary Workspace</h3>
+            <div style="font-size: 2rem; margin-bottom: 1rem; font-family: ui-monospace, Consolas, monospace; color: #0f172a;">[ # ]</div>
+            <p class="text-dim" style="font-size:0.9rem; text-transform:none; font-weight:normal; letter-spacing:normal;">Inspect term definitions, change history, and deprecated labels before attaching structured references.</p>
           </div>
           
           <div class="stat-card" style="cursor:pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="switchTab('dashboard')" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow)'" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 15px -3px rgba(0,0,0,0.1)'">
@@ -703,31 +715,16 @@
             <div class="subpanel">
               <div class="subpanel-header">
                 <div>
-                  <div class="subpanel-title">DMS Vocabulary Browser</div>
-                  <div class="subpanel-copy">Browse a DMS vocabulary, review change history, and add a term directly into <code>subject_ref</code>.</div>
+                  <div class="subpanel-title">Vocabulary Workspace</div>
+                  <div class="subpanel-copy">Open the dedicated Vocabulary tab to inspect term history, read full definitions, and attach structured subject references to this record.</div>
                 </div>
               </div>
-              <div class="taxonomy-controls">
-                <div class="form-group">
-                  <label>Vocabulary</label>
-                  <select id="taxonomy-vocabulary"></select>
-                </div>
-                <div class="form-group taxonomy-search-group">
-                  <label>Search Terms</label>
-                  <input type="text" id="taxonomy-search" placeholder="Search labels, IDs, and definitions">
-                </div>
+              <div id="taxonomy-workspace-status" class="notice-panel">
+                The Vocabulary tab lets you browse DMS vocabularies and attach structured references without leaving DMS Vault.
               </div>
-              <div class="taxonomy-toolbar">
-                <label class="checkbox-inline">
-                  <input type="checkbox" id="taxonomy-include-deprecated">
-                  Include deprecated terms
-                </label>
-              </div>
-              <div id="taxonomy-summary" class="taxonomy-meta"></div>
-              <div id="taxonomy-links" class="taxonomy-links"></div>
-              <div id="taxonomy-changes" class="notice-panel" style="display:none;"></div>
-              <div id="taxonomy-results" class="taxonomy-results">
-                <div class="empty-inline">Loading DMS vocabularies...</div>
+              <div class="item-actions">
+                <button type="button" class="btn btn-secondary btn-small" onclick="switchTab('vocabulary')">Open Vocabulary Workspace</button>
+                <a class="mini-link" href="/api/taxonomy" target="_blank" rel="noreferrer">Open API</a>
               </div>
             </div>
           </div>
@@ -974,6 +971,75 @@
       </form>
     </div>
 
+    <!-- ═══ VOCABULARY TAB ═══ -->
+    <div class="page" id="page-vocabulary">
+      <section class="form-section">
+        <h3>DMS Vocabulary Workspace</h3>
+        <p class="text-dim" style="margin-top:0.35rem;">
+          Browse DMS vocabularies, inspect term history, review deprecations, and attach structured subject references to the record you are building.
+        </p>
+        <div class="taxonomy-layout">
+          <div class="subpanel">
+            <div class="subpanel-header">
+              <div>
+                <div class="subpanel-title">Vocabulary Browser</div>
+                <div class="subpanel-copy">Search a DMS vocabulary, compare active and deprecated terms, and inspect semantic export formats.</div>
+              </div>
+            </div>
+            <div class="taxonomy-controls">
+              <div class="form-group">
+                <label>Vocabulary</label>
+                <select id="taxonomy-vocabulary"></select>
+              </div>
+              <div class="form-group taxonomy-search-group">
+                <label>Search Terms</label>
+                <input type="text" id="taxonomy-search" placeholder="Search labels, IDs, and definitions">
+              </div>
+            </div>
+            <div class="taxonomy-toolbar">
+              <label class="checkbox-inline">
+                <input type="checkbox" id="taxonomy-include-deprecated">
+                Include deprecated terms
+              </label>
+            </div>
+            <div id="taxonomy-summary" class="taxonomy-meta"></div>
+            <div id="taxonomy-links" class="taxonomy-links"></div>
+            <div id="taxonomy-changes" class="notice-panel" style="display:none;"></div>
+            <div id="taxonomy-results" class="taxonomy-results">
+              <div class="empty-inline">Loading DMS vocabularies...</div>
+            </div>
+          </div>
+          <div class="taxonomy-stack">
+            <div class="subpanel">
+              <div class="subpanel-header">
+                <div>
+                  <div class="subpanel-title">Term Detail</div>
+                  <div class="subpanel-copy">Select a term to review its canonical label, change history, and DMS identifier before you add it to a record.</div>
+                </div>
+              </div>
+              <div id="taxonomy-term-detail" class="subject-ref-list">
+                <div class="empty-inline">Select a term from the browser to inspect it here.</div>
+              </div>
+            </div>
+            <div class="subpanel">
+              <div class="subpanel-header">
+                <div>
+                  <div class="subpanel-title">Current Record References</div>
+                  <div class="subpanel-copy">Any structured subject references you add here are immediately reflected in the Create tab.</div>
+                </div>
+              </div>
+              <div id="subject-ref-list-vocabulary" class="subject-ref-list">
+                <div class="empty-inline">No structured references have been added to this record yet.</div>
+              </div>
+              <div class="item-actions">
+                <button type="button" class="btn btn-secondary btn-small" onclick="switchTab('create')">Return to Create</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
     <!-- ═══ RECORDS TAB ═══ -->
     <div class="page" id="page-records">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
@@ -1069,6 +1135,7 @@
       deprecated: {},
       currentTerms: [],
       currentVocabulary: '',
+      currentTermDetail: null,
     };
 
     // ─── Init ─────────────────────────────────────────
@@ -1134,6 +1201,7 @@
       document.getElementById('page-' + name).classList.add('active');
 
       if (name === 'records' || name === 'dashboard') loadRecords();
+      if (name === 'vocabulary') refreshTaxonomyBrowser();
       if (name === 'preview') previewJSON();
     }
 
@@ -1328,8 +1396,10 @@
         ]);
         renderSubjectRefs();
         renderDeprecatedWarnings();
+        renderTaxonomyWorkspaceStatus();
       } catch (e) {
         document.getElementById('taxonomy-results').innerHTML = '<div class="empty-inline">Unable to load DMS vocabularies right now.</div>';
+        renderTaxonomyTermDetail();
       }
     }
 
@@ -1361,9 +1431,14 @@
     }
 
     async function refreshTaxonomyBrowser() {
-      const vocabulary = document.getElementById('taxonomy-vocabulary').value;
-      const search = document.getElementById('taxonomy-search').value.trim();
-      const includeDeprecated = document.getElementById('taxonomy-include-deprecated').checked;
+      const vocabularyField = document.getElementById('taxonomy-vocabulary');
+      const searchField = document.getElementById('taxonomy-search');
+      const deprecatedField = document.getElementById('taxonomy-include-deprecated');
+      if (!vocabularyField || !searchField || !deprecatedField) return;
+
+      const vocabulary = vocabularyField.value;
+      const search = searchField.value.trim();
+      const includeDeprecated = deprecatedField.checked;
       if (!vocabulary) return;
 
       taxonomyState.currentVocabulary = vocabulary;
@@ -1385,9 +1460,38 @@
         renderTaxonomyLinks(vocabulary);
         renderTaxonomyChanges(vocabulary);
         renderTaxonomyResults(vocabulary);
+        renderTaxonomyWorkspaceStatus();
+
+        const currentIdentifier = taxonomyState.currentTermDetail?.id;
+        const hasCurrentTerm = currentIdentifier && taxonomyState.currentTerms.some(term => term.id === currentIdentifier);
+        if (hasCurrentTerm) {
+          renderTaxonomyTermDetail();
+        } else if (taxonomyState.currentTerms.length) {
+          await openTaxonomyTerm(vocabulary, encodeURIComponent(taxonomyState.currentTerms[0].id));
+        } else {
+          taxonomyState.currentTermDetail = null;
+          renderTaxonomyTermDetail();
+        }
       } catch (e) {
         document.getElementById('taxonomy-results').innerHTML = '<div class="empty-inline">Unable to retrieve this vocabulary right now.</div>';
+        taxonomyState.currentTermDetail = null;
+        renderTaxonomyTermDetail();
       }
+    }
+
+    function renderTaxonomyWorkspaceStatus() {
+      const panel = document.getElementById('taxonomy-workspace-status');
+      if (!panel) return;
+
+      const vocabulary = taxonomyState.currentVocabulary || taxonomyState.vocabularies[0] || '';
+      const structure = taxonomyState.structures[vocabulary] || {};
+      const vocabularyLabel = structure.label || humanizeTerm(vocabulary || 'types');
+      const refCount = taxonomyState.selectedRefs.length;
+
+      panel.innerHTML = `
+        <strong>${refCount}</strong> structured ${refCount === 1 ? 'reference' : 'references'} attached to this record.<br>
+        Active vocabulary workspace: <strong>${escapeHtml(vocabularyLabel)}</strong>.
+      `;
     }
 
     function renderTaxonomySummary(vocabulary) {
@@ -1484,6 +1588,9 @@
             <div class="item-body">${escapeHtml(term.definition || 'No definition recorded for this term yet.')}</div>
             ${replacement}
             <div class="item-actions">
+              <button type="button" class="btn btn-primary btn-small" onclick="openTaxonomyTerm('${escapeHtml(vocabulary)}', '${encodeURIComponent(term.id)}')">
+                Inspect Term
+              </button>
               <button type="button" class="btn btn-secondary btn-small" onclick="addSubjectReferenceFromBrowser('${escapeHtml(vocabulary)}', '${encodeURIComponent(term.id)}')" ${added ? 'disabled' : ''}>
                 ${added ? 'Added to Record' : 'Add as Subject Ref'}
               </button>
@@ -1494,14 +1601,80 @@
       }).join('');
     }
 
-    function renderSubjectRefs() {
-      const list = document.getElementById('subject-ref-list');
-      if (!taxonomyState.selectedRefs.length) {
-        list.innerHTML = '<div class="empty-inline">No structured references have been added to this record yet.</div>';
+    async function openTaxonomyTerm(vocabulary, encodedIdentifier) {
+      const identifier = decodeURIComponent(encodedIdentifier);
+      const panel = document.getElementById('taxonomy-term-detail');
+      if (!panel) return;
+
+      panel.innerHTML = '<div class="empty-inline">Loading term detail...</div>';
+
+      try {
+        await ensureVocabularyMeta(vocabulary);
+        const res = await fetch(`/api/taxonomy/${encodeURIComponent(vocabulary)}/terms/${encodeURIComponent(identifier)}`);
+        if (!res.ok) {
+          throw new Error('Unable to load the selected term.');
+        }
+        const term = await res.json();
+        taxonomyState.currentTermDetail = {
+          ...term,
+          vocabulary,
+        };
+        renderTaxonomyTermDetail();
+      } catch (e) {
+        taxonomyState.currentTermDetail = null;
+        panel.innerHTML = `<div class="empty-inline">${escapeHtml(e.message || 'Unable to load the selected term.')}</div>`;
+      }
+    }
+
+    function renderTaxonomyTermDetail() {
+      const panel = document.getElementById('taxonomy-term-detail');
+      if (!panel) return;
+
+      const term = taxonomyState.currentTermDetail;
+      if (!term) {
+        panel.innerHTML = '<div class="empty-inline">Select a term from the browser to inspect it here.</div>';
         return;
       }
 
-      list.innerHTML = taxonomyState.selectedRefs.map((ref, index) => {
+      const vocabulary = term.vocabulary || taxonomyState.currentVocabulary || inferVocabularyFromIdentifier(term.id) || '';
+      const structure = taxonomyState.structures[vocabulary] || {};
+      const added = taxonomyState.selectedRefs.some(ref => ref.identifier === term.id);
+      const replacement = term.supersededBy
+        ? `<div class="item-body" style="margin-top:0.45rem;">Replacement: <strong>${escapeHtml(getReplacementLabel(term.supersededBy))}</strong></div>`
+        : '';
+      const changes = Array.isArray(term.changeLog) ? term.changeLog : [];
+      const changeMarkup = changes.length
+        ? `<div class="item-body" style="margin-top:0.8rem;"><strong>Recent change notes</strong></div><ul>${changes.slice(0, 4).map(entry => `<li>${escapeHtml(entry.date ? `${entry.date}: ` : '')}${escapeHtml(entry.message || '')}</li>`).join('')}</ul>`
+        : '<div class="item-body" style="margin-top:0.8rem;">No change notes have been recorded for this term.</div>';
+
+      panel.innerHTML = `
+        <div class="subject-ref-card ${term.deprecated ? 'deprecated' : ''}">
+          <div class="item-head">
+            <div>
+              <div class="item-title">${escapeHtml(term.label || humanizeTerm(term.id))}</div>
+              <div class="item-subtitle">${escapeHtml(term.id || '')}</div>
+            </div>
+            <div class="badge-row">
+              <span class="taxonomy-badge meta">${escapeHtml(structure.label || humanizeTerm(vocabulary || 'DMS Vocabulary'))}</span>
+              <span class="taxonomy-badge ${term.deprecated ? 'deprecated' : 'live'}">${term.deprecated ? 'Deprecated' : 'Active'}</span>
+            </div>
+          </div>
+          <div class="item-body">${escapeHtml(term.definition || 'No definition recorded for this term yet.')}</div>
+          ${replacement}
+          ${changeMarkup}
+          <div class="item-actions">
+            <button type="button" class="btn btn-secondary btn-small" onclick="addSubjectReferenceFromBrowser('${escapeHtml(vocabulary)}', '${encodeURIComponent(term.id)}')" ${added ? 'disabled' : ''}>
+              ${added ? 'Added to Record' : 'Add as Subject Ref'}
+            </button>
+            <a class="mini-link" href="/api/taxonomy/${encodeURIComponent(vocabulary)}/terms/${encodeURIComponent(shortTermId(term.id || ''))}?format=html" target="_blank" rel="noreferrer">Open Term Page</a>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSubjectRefs() {
+      const markup = taxonomyState.selectedRefs.length
+        ? taxonomyState.selectedRefs.map((ref, index) => {
         return `
           <div class="subject-ref-card ${ref.deprecated ? 'deprecated' : ''}">
             <div class="item-head">
@@ -1521,7 +1694,15 @@
             </div>
           </div>
         `;
-      }).join('');
+      }).join('')
+        : '<div class="empty-inline">No structured references have been added to this record yet.</div>';
+
+      ['subject-ref-list', 'subject-ref-list-vocabulary'].forEach(id => {
+        const list = document.getElementById(id);
+        if (list) list.innerHTML = markup;
+      });
+
+      renderTaxonomyWorkspaceStatus();
     }
 
     function addSubjectReferenceFromBrowser(vocabulary, encodedIdentifier) {
@@ -1547,6 +1728,7 @@
       taxonomyState.selectedRefs.push(ref);
       renderSubjectRefs();
       renderTaxonomyResults(vocabulary);
+      renderTaxonomyTermDetail();
       renderDeprecatedWarnings();
 
       if (ref.deprecated) {
@@ -1561,6 +1743,7 @@
       taxonomyState.selectedRefs.splice(index, 1);
       renderSubjectRefs();
       renderTaxonomyResults(taxonomyState.currentVocabulary);
+      renderTaxonomyTermDetail();
       renderDeprecatedWarnings();
     }
 

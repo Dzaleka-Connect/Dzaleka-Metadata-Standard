@@ -72,6 +72,8 @@ The easiest way to build, validate, and manage records is using the built-in loc
 dms web --port 8080 --dir records/
 ```
 
+DMS Vault includes a dedicated `Vocabulary` workspace for browsing vocabularies, inspecting term history, and attaching structured subject references while you build records.
+
 This also exposes a local vocabulary API at `http://127.0.0.1:8080/api/taxonomy` for DMS term lookups, deprecations, change logs, and JSON-LD/Turtle/RDF/XML output.
 
 ### Create a Record via CLI
