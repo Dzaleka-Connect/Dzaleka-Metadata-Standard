@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CLI**: Interactive generator prompts for structured subject references, technical metadata, consent/sensitivity, and typed relations
 - **CLI**: CSV conversion support for new v1.1 fields
 - **API**: Local taxonomy service for vocabularies, subsets, deprecated terms, change logs, structure summaries, and JSON-LD/Turtle/RDF/XML output
+- **Web UI**: Dedicated Vocabulary workspace for browsing DMS term sets, inspecting term history, and attaching structured subject references to active records
 - **Docs**: Semantic Tagging guide with DMS-native recommendations for building a community-managed taxonomy
 - **Docs**: Semantic Tagging guide now covers authorities, stable identifiers, deprecations, mappings, and relevance-aware future tooling
 - **Docs**: Semantic Tagging guide now includes SKOS labels/matches, change notes, and geography/organization/person relationship modeling
