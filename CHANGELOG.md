@@ -5,17 +5,30 @@ All notable changes to the Dzaleka Metadata Standard will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.2.0] - 2026-09-21
+## [1.3.0] - 2026-09-21
 
 ### Added
 - Full-screen terminal workspace (`dms` / `dms tui`) for browsing local records, vocabularies, schema fields, and opt-in Dzaleka Services sources, with night/day themes, a command palette, JSON copy, and a bottom search prompt.
-- Kumo/React web workspace with a complete schema-driven editor, record search, JSON import, downloads, and unsaved-draft protection.
-- Opt-in readers for published Dzaleka Services collections, including the Encyclopedia API, poets, artists, dancers, and services listings, with cached responses and reviewable local drafts.
-- Frontend unit tests, isolated desktop/mobile browser checks, and API regression tests.
+- Optional `[tui]` extra (Textual) and `python -m dms` entry point.
+- Opt-in readers for the Encyclopedia API plus poets, artists, dancers, and services listings.
 
 ### Changed
 - Command-line output (`info`, `validate`, `stats`, `search`, `diff`) uses a quieter, document-like layout instead of heavy boxes.
 - Running `dms` with no arguments in an interactive terminal opens the workspace; non-interactive sessions still print help.
+- `dms web` uses the next free port when 8080 is already in use.
+
+### Fixed
+- Dzaleka Services HTTPS reads verify certificates with certifi, so macOS Python.org installs can load published collections.
+- Certificate failures are reported as such instead of a generic connection error.
+
+## [1.2.0] - 2026-09-21
+
+### Added
+- Kumo/React web workspace with a complete schema-driven editor, record search, JSON import, downloads, and unsaved-draft protection.
+- Opt-in readers for seven published Dzaleka Services collections, with cached responses and reviewable local drafts.
+- Frontend unit tests, isolated desktop/mobile browser checks, and API regression tests.
+
+### Changed
 - The Python package requires Python 3.10 or newer. The metadata schema remains at version 1.1.0.
 - Replaced the handwritten web page with locally bundled assets; removed inline JavaScript from the web app's content security policy.
 - Enabled UUID, date, and URI format validation. Existing records with invalid formats now require correction.

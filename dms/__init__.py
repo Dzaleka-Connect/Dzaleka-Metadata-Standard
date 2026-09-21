@@ -5,5 +5,5 @@ An open-source metadata standard for documenting and sharing
 Dzaleka's digital heritage.
 """
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 __schema_version__ = "1.1.0"
