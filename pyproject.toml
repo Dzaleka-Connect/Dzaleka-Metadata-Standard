@@ -37,6 +37,7 @@ classifiers = [
     "Topic :: Text Processing :: Markup",
 ]
 dependencies = [
+    "certifi>=2024.0.0",
     "click>=8.0",
     "jsonschema>=4.0",
     "rfc3986-validator>=0.1.1",
@@ -45,9 +46,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+tui = ["textual>=8.2,<9"]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
+    "textual>=8.2,<9",
 ]
 
 [project.scripts]
@@ -63,7 +66,7 @@ Issues = "https://github.com/Dzaleka-Connect/Dzaleka-Metadata-Standard/issues"
 include = ["dms*"]
 
 [tool.setuptools.package-data]
-dms = ["templates/*.html", "static/*", "data/schema/*.json", "data/schema/*.yaml", "data/schema/*.jsonld", "data/taxonomy/*.json"]
+dms = ["*.tcss", "templates/*.html", "static/*", "data/schema/*.json", "data/schema/*.yaml", "data/schema/*.jsonld", "data/taxonomy/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -9,14 +9,9 @@ import json
 from pathlib import Path
 
 from jsonschema import Draft202012Validator, FormatChecker, ValidationError
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich import box
 
 from dms.schema import load_schema, get_required_fields
-
-console = Console()
+from dms.style import console, make_table
 
 
 # Human-readable names for JSON Schema paths
@@ -359,23 +354,15 @@ def get_warnings(record: dict) -> list[str]:
 def print_validation_result(filepath: str, is_valid: bool, errors: list[dict], warnings: list[str] | None = None):
     """Pretty-print validation results using Rich."""
     if is_valid:
-        console.print(Panel(
-            f"[bold green]✓ VALID[/bold green]  {filepath}",
-            box=box.ROUNDED,
-            border_style="green",
-        ))
+        console.print(f"  [green]✓[/green]  {filepath}")
         if warnings:
-            for w in warnings:
-                console.print(f"  [yellow]⚠ {w}[/yellow]")
+            for warning in warnings:
+                console.print(f"     [yellow]![/yellow]  {warning}")
     else:
-        console.print(Panel(
-            f"[bold red]✗ INVALID[/bold red]  {filepath}",
-            box=box.ROUNDED,
-            border_style="red",
-        ))
-        table = Table(box=box.SIMPLE_HEAVY, show_header=True, header_style="bold")
-        table.add_column("Field", style="cyan", min_width=15)
-        table.add_column("Issue", style="white")
+        console.print(f"  [red]✗[/red]  {filepath}")
+        table = make_table()
+        table.add_column("Field", style="dim", min_width=15)
+        table.add_column("Issue")
         for err in errors:
             table.add_row(err["field"], err["message"])
         console.print(table)
@@ -388,16 +375,12 @@ def print_batch_summary(result: dict):
     invalid = result["invalid"]
 
     if total == 0:
-        console.print("[yellow]No .json files found in directory.[/yellow]")
+        console.print("  [yellow]No .json files found in directory.[/yellow]")
         return
 
-    style = "green" if invalid == 0 else "red"
+    tone = "green" if invalid == 0 else "red"
     console.print()
-    console.print(Panel(
-        f"[bold]Batch Validation Summary[/bold]\n\n"
-        f"  Total files:  {total}\n"
-        f"  [green]Valid:        {valid}[/green]\n"
-        f"  [red]Invalid:      {invalid}[/red]",
-        box=box.ROUNDED,
-        border_style=style,
-    ))
+    console.print(
+        f"  [bold]{total}[/bold] files  ·  [green]{valid} valid[/green]  ·  [{tone}]{invalid} invalid[/{tone}]"
+    )
+    console.print()

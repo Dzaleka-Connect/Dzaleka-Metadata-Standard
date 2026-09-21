@@ -38,7 +38,10 @@ export default function Sources({ onImport }) {
   const filtered = items?.filter(item => [item.title, item.description, item.creator, ...item.tags].join(' ').toLowerCase().includes(search));
   return <>
     <div className="page-heading"><div><p className="eyebrow">From the community</p><h1>Sources</h1><p>Start a DMS record from a published Dzaleka Services item.</p></div>
-      <a href="https://services.dzaleka.com/api-docs/" target="_blank" rel="noreferrer">API documentation &nearr;</a></div>
+      <div className="actions">
+        <a href="https://services.dzaleka.com/api-docs/" target="_blank" rel="noreferrer">API documentation &nearr;</a>
+        <a href="https://services.dzaleka.com/encyclopedia/developers/" target="_blank" rel="noreferrer">Encyclopedia API &nearr;</a>
+      </div></div>
     <div className="notice"><strong>Import as a draft, not as permission.</strong> Check the description, language, consent, and reuse rights before saving. Your local records are never sent to this service.</div>
     <div className="toolbar"><Select label="Source collection" disabled={busy} value={collection}
       items={Object.fromEntries(collections.map(item => [item.id, item.label]))}
@@ -47,7 +50,7 @@ export default function Sources({ onImport }) {
       <Input label="Search loaded items" value={query} disabled={!items} onChange={event => setQuery(event.target.value)} />
     </div>
     {error && <div className="notice error" role="alert">{error}</div>}
-    {items === null ? <div className="empty-state"><h2>Choose what to explore</h2><p>Browse art, photographs, events, stories, resources, news, or mapped places.</p><p className="muted">Connects only when you load a collection. Responses are cached for five minutes.</p></div> : <>
+    {items === null ? <div className="empty-state"><h2>Choose what to explore</h2><p>Browse encyclopedia entries, art, photographs, events, stories, poets, services, or mapped places.</p><p className="muted">Connects only when you load a collection. Responses are cached for five minutes.</p></div> : <>
       <p className="list-caption" role="status">{filtered.length} of {items.length} items {cached && <Badge variant="secondary">Cached</Badge>}</p>
       <div className="source-grid">{filtered.map(item => <article className="source-card" key={item.identifier}>
         <div className="source-top"><Badge variant="secondary">{item.type}</Badge><a href={item.url} target="_blank" rel="noreferrer">Source &nearr;</a></div>

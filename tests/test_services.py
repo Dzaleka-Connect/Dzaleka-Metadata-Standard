@@ -1,4 +1,5 @@
 import json
+import ssl
 from unittest.mock import MagicMock, patch
 from urllib.error import HTTPError, URLError
 
@@ -69,13 +70,77 @@ def test_source_file_urls_are_encoded_and_malformed_urls_are_ignored(url, expect
     assert entry["file_uri"] == expected
 
 
-@pytest.mark.parametrize("collection", ["artworks", "photos", "events", "community-voices", "resources", "news"])
+@pytest.mark.parametrize("collection", ["artworks", "photos", "events", "community-voices", "resources", "news", "poets", "artists", "dancers", "services"])
 def test_supported_collection_envelopes(collection):
     entries = normalize_collection(collection, {"data": {collection: [{"id": "one", "title": "One"}]}})
     assert len(entries) == 1
     draft = source_to_draft(entries[0])
     draft.update(language="en", description="Reviewed description")
     assert validate_record(draft) == []
+
+
+def test_encyclopedia_entries_map_types_license_and_review_dates():
+    payload = {
+        "data": {"entries": [
+            {"id": "angela-abizera", "title": "Angela Abizera", "summary": "A poet and advocate.",
+             "entryType": "person", "category": "People", "aliases": ["Angela Azibera"],
+             "url": "https://services.dzaleka.com/encyclopedia/angela-abizera",
+             "image": "/images/encyclopedia/angela-abizera.jpg",
+             "lastReviewed": "2026-07-13T00:00:00.000Z", "datePublished": "2026-07-13T00:00:00.000Z",
+             "relatedEntries": ["education-in-dzaleka"],
+             "facts": [{"label": "Raised in", "value": "Dzaleka (16+ years)"}]},
+            {"id": "health-centre", "title": "Dzaleka Health Centre", "summary": "A clinic.",
+             "entryType": "place", "category": "Health"},
+        ]},
+        "license": {"name": "Dzaleka Online Services Open License",
+                    "url": "https://services.dzaleka.com/open-license",
+                    "attribution": "Dzaleka Encyclopedia, Dzaleka Online Services"},
+    }
+    entries = normalize_collection("encyclopedia", payload)
+    assert [entry["type"] for entry in entries] == ["document", "site"]
+    assert entries[0]["file_uri"] == ""
+    assert entries[0]["location"] == "Dzaleka (16+ years)"
+    assert "People" in entries[0]["tags"] and "Angela Azibera" in entries[0]["tags"]
+    draft = source_to_draft(entries[0])
+    assert draft["rights"]["license"] == "Dzaleka Online Services Open License"
+    assert "Dzaleka Encyclopedia" in draft["rights"]["access_note"]
+    assert draft["date"]["event_date"] == draft["date"]["modified"] == "2026-07-13"
+    assert draft["relation_detail"][0]["target"].endswith("/api/encyclopedia#angela-abizera")
+    assert draft["relation_detail"][1]["target"].endswith("/api/encyclopedia#education-in-dzaleka")
+    assert "email" not in json.dumps(draft)
+    draft.update(language="en")
+    assert validate_record(draft) == []
+
+
+def test_poet_profiles_use_the_poet_as_creator_without_contact_fields():
+    payload = {"data": {"poets": [{"id": "angela-abizera", "title": "Angela Abizera",
+                                   "description": "Poetry team leader.", "email": "hidden@example.com",
+                                   "whatsapp": "+265000", "nationality": "Rwanda"}]}}
+    entry = normalize_collection("poets", payload)[0]
+    draft = source_to_draft(entry)
+    assert draft["creator"] == [{"name": "Angela Abizera", "role": "poet"}]
+    assert draft["type"] == "document"
+    assert "hidden@example.com" not in json.dumps(draft)
+    assert "+265000" not in json.dumps(draft)
+
+
+def test_encyclopedia_pagination_stays_on_the_allowlisted_path():
+    pages = [
+        {"data": {"entries": [{"id": "one", "title": "One"}]}, "meta": {"totalPages": 2, "page": 1}},
+        {"data": {"entries": [{"id": "two", "title": "Two"}]}, "meta": {"totalPages": 2, "page": 2}},
+    ]
+    response = MagicMock()
+    response.__enter__.return_value.read.side_effect = [json.dumps(page).encode() for page in pages]
+    with patch("dms.services.build_opener") as opener:
+        opener.return_value.open.return_value = response
+        entries, cached = ServicesClient().fetch("encyclopedia")
+    assert not cached
+    assert [entry["identifier"] for entry in entries] == ["one", "two"]
+    urls = [call.args[0].full_url for call in opener.return_value.open.call_args_list]
+    assert urls == [
+        "https://services.dzaleka.com/api/encyclopedia?perPage=100&page=1",
+        "https://services.dzaleka.com/api/encyclopedia?perPage=100&page=2",
+    ]
 
 
 @pytest.mark.parametrize("payload", [None, [], {}, {"data": []}, {"data": {"artworks": {}}}])
@@ -127,3 +192,13 @@ def test_offline_error_is_actionable():
         with pytest.raises(ServicesError) as result:
             ServicesClient().fetch("artworks")
         assert result.value.status == 503
+        assert "connection" in str(result.value).lower()
+
+
+def test_certificate_errors_explain_the_ssl_problem():
+    with patch("dms.services.build_opener") as opener:
+        opener.return_value.open.side_effect = URLError(ssl.SSLCertVerificationError("unable to get local issuer certificate"))
+        with pytest.raises(ServicesError) as result:
+            ServicesClient().fetch("artworks")
+        assert result.value.status == 503
+        assert "certificate" in str(result.value).lower()

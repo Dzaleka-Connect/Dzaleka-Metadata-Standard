@@ -62,7 +62,22 @@ cd dzaleka-metadata-standard
 
 # Install the CLI tools
 pip install -e .
+
+# Optional: full-screen terminal workspace
+pip install -e ".[tui]"
 ```
+
+### The terminal workspace
+
+In a real terminal, run `dms` with no arguments — the same way you would open Grok Build. It starts a full-screen, keyboard-first workspace for browsing local records, validation, vocabularies, and schema fields. Nothing is uploaded, and nothing on disk is changed.
+
+```bash
+dms
+dms tui --dir examples/
+dms tui --light
+```
+
+`/` focuses search, `Ctrl+P` opens the command palette, `Ctrl+T` toggles the night and day themes, and `Q` quits. Use `dms init`, `dms validate`, and `dms web` when you need to create or edit records.
 
 ### The Web UI
 
@@ -74,7 +89,7 @@ dms web --port 8080 --dir records/
 
 The DMS workspace includes a schema-driven editor, searchable records, JSON import, JSON/JSON-LD downloads, and a `Vocabulary` workspace for term lookups and structured references. Unsaved drafts are protected when switching to another record.
 
-The `Sources` workspace can read seven published [Dzaleka Services collections](docs/services-api.md) and prepare local drafts for review. Loading a collection is opt-in; local record contents are never uploaded. Review consent and reuse rights before sharing.
+The `Sources` workspace can read published [Dzaleka Services collections](docs/services-api.md) — including the [Encyclopedia API](https://services.dzaleka.com/encyclopedia/developers/) — and prepare local drafts for review. Loading a collection is opt-in; local record contents are never uploaded. Review consent and reuse rights before sharing.
 
 React and Kumo assets are bundled with the Python package. Node.js and a CDN connection are not needed to run the installed app. This is a localhost workspace, not an authenticated public hosting service. Rights metadata does not enforce filesystem access.
 
@@ -166,6 +181,7 @@ All fields map to [Dublin Core](https://www.dublincore.org/specifications/dublin
 ```
 ├── dms/                 Python CLI tools
 │   ├── cli.py           Command entry points
+│   ├── terminal.py      Full-screen terminal workspace
 │   ├── validator.py     Schema validation engine
 │   ├── generator.py     Interactive record creator
 │   ├── converter.py     CSV ↔ JSON converter

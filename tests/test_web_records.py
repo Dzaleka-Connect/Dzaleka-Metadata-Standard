@@ -10,7 +10,7 @@ from unittest.mock import patch
 import pytest
 
 from dms.services import ServicesError
-from dms.web import make_handler
+from dms.web import bind_local_server, make_handler
 
 
 @pytest.fixture(scope="module")
@@ -33,6 +33,23 @@ def request(server, path, data=None):
 
 def record(**fields):
     return {"id": str(uuid.uuid4()), "title": "Test record", "type": "story", "description": "A story.", "language": "en", **fields}
+
+
+def test_bind_falls_back_when_the_requested_port_is_busy(tmp_path):
+    handler = make_handler(tmp_path)
+    busy = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    try:
+        taken = busy.server_address[1]
+        with pytest.raises(OSError) as error:
+            bind_local_server(handler, taken, fallback=False)
+        assert "already in use" in error.value.strerror
+        server = bind_local_server(handler, taken, fallback=True)
+        try:
+            assert server.server_address[1] != taken
+        finally:
+            server.server_close()
+    finally:
+        busy.server_close()
 
 
 def test_static_ui_and_schema_are_self_contained(server):
@@ -90,7 +107,9 @@ def test_encoded_term_identifier_and_unknown_vocabulary(server):
 def test_source_rate_limit_header_and_catalog_without_network(server):
     with patch("dms.services.ServicesClient.fetch", side_effect=ServicesError("Busy", 429, 30)) as fetch:
         with request(server, "/api/sources") as response:
-            assert len(json.load(response)["collections"]) == 7
+            collections = json.load(response)["collections"]
+            assert len(collections) == 12
+            assert {item["id"] for item in collections} >= {"encyclopedia", "poets"}
         fetch.assert_not_called()
         with pytest.raises(HTTPError) as error:
             request(server, "/api/sources/artworks")

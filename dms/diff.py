@@ -9,12 +9,7 @@ auditing record edits.
 import json
 from pathlib import Path
 
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich import box
-
-console = Console()
+from dms.style import console, make_table
 
 
 def diff_records(record_a: dict, record_b: dict) -> list[dict]:
@@ -104,28 +99,18 @@ def print_diff(diffs: list[dict], path_a: str = "A", path_b: str = "B", show_unc
     unchanged = [d for d in diffs if d["status"] == "unchanged"]
 
     if not changes:
-        console.print(Panel(
-            "[green]Records are identical — no differences found.[/green]",
-            box=box.ROUNDED,
-            border_style="green",
-        ))
+        console.print("  [green]Records are identical — no differences found.[/green]")
         return
 
-    # Status badges
     status_style = {
-        "added": "[bold green]+added[/bold green]",
-        "removed": "[bold red]−removed[/bold red]",
-        "changed": "[bold yellow]~changed[/bold yellow]",
+        "added": "[green]+ added[/green]",
+        "removed": "[red]− removed[/red]",
+        "changed": "[yellow]~ changed[/yellow]",
         "unchanged": "[dim]=[/dim]",
     }
 
-    table = Table(
-        title=f"Diff: {Path(path_a).name} ↔ {Path(path_b).name}",
-        box=box.ROUNDED,
-        show_header=True,
-        header_style="bold cyan",
-    )
-    table.add_column("Field", style="white", min_width=14)
+    table = make_table(f"{Path(path_a).name}  →  {Path(path_b).name}")
+    table.add_column("Field", min_width=14)
     table.add_column("Status", justify="center", min_width=10)
     table.add_column(Path(path_a).name, style="red", min_width=20, max_width=45)
     table.add_column(Path(path_b).name, style="green", min_width=20, max_width=45)
