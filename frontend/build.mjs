@@ -26,4 +26,4 @@ for (const name of packages) {
   notices.push(`${name} ${metadata.version}`, ...(await Promise.all(files.map(file => readFile(`${directory}/${file}`, 'utf8')))));
 }
 notices.push('Tailwind CSS (included in the Kumo standalone stylesheet)', await readFile('LICENSE.tailwind', 'utf8'));
-await writeFile('../dms/static/licenses.txt', notices.join('\n\n') + '\n');
+await writeFile('../dms/static/licenses.txt', notices.map(notice => notice.trimEnd()).join('\n\n') + '\n');
