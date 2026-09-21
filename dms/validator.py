@@ -8,7 +8,7 @@ with human-friendly error reporting using Rich.
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator, ValidationError
+from jsonschema import Draft202012Validator, FormatChecker, ValidationError
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
@@ -220,7 +220,7 @@ def validate_record(record: dict) -> list[dict]:
         Each error dict has keys: field, message, validator, path.
     """
     schema = load_schema()
-    validator = Draft202012Validator(schema)
+    validator = Draft202012Validator(schema, format_checker=FormatChecker())
     errors = sorted(validator.iter_errors(record), key=lambda e: list(e.absolute_path))
     formatted = [_format_error(e) for e in errors]
     if formatted:

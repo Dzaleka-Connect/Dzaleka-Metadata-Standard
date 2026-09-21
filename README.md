@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/Code-MIT-blue.svg)](LICENSE)
 [![License: CC BY 4.0](https://img.shields.io/badge/Docs-CC%20BY%204.0-lightgrey.svg)](LICENSE-DOCS)
-[![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-green.svg)](https://www.python.org/)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-green.svg)](https://www.python.org/)
 [![Schema: v1.1.0](https://img.shields.io/badge/Schema-v1.1.0-orange.svg)](dms/data/schema/dms.json)
 
 > **An open-source metadata specification and toolkit for describing, organising, and sharing digital heritage content from Dzaleka Refugee Camp.**
@@ -39,7 +39,7 @@ Available formats:
 
 ### 🛠️ Python Tools & Web UI
 
-A suite of tools for creating, validating, and converting metadata records. Includes both a command-line interface (CLI) and a local premium Web UI (DMS Vault). See [Quick Start](#quick-start) below.
+A suite of tools for creating, validating, and converting metadata records. Includes a command-line interface and a local web workspace built with [Kumo](https://kumo-ui.com/). See [Quick Start](#quick-start) below.
 
 ### 📖 Documentation
 
@@ -64,15 +64,19 @@ cd dzaleka-metadata-standard
 pip install -e .
 ```
 
-### The Web UI (DMS Vault)
+### The Web UI
 
-The easiest way to build, validate, and manage records is using the built-in local Web UI:
+To create, validate, and manage records in a browser, start the local workspace:
 
 ```bash
 dms web --port 8080 --dir records/
 ```
 
-DMS Vault includes a dedicated `Vocabulary` workspace for browsing vocabularies, inspecting term history, and attaching structured subject references while you build records.
+The DMS workspace includes a schema-driven editor, searchable records, JSON import, JSON/JSON-LD downloads, and a `Vocabulary` workspace for term lookups and structured references. Unsaved drafts are protected when switching to another record.
+
+The `Sources` workspace can read seven published [Dzaleka Services collections](docs/services-api.md) and prepare local drafts for review. Loading a collection is opt-in; local record contents are never uploaded. Review consent and reuse rights before sharing.
+
+React and Kumo assets are bundled with the Python package. Node.js and a CDN connection are not needed to run the installed app. This is a localhost workspace, not an authenticated public hosting service. Rights metadata does not enforce filesystem access.
 
 This also exposes a local vocabulary API at `http://127.0.0.1:8080/api/taxonomy` for DMS term lookups, deprecations, change logs, and JSON-LD/Turtle/RDF/XML output.
 

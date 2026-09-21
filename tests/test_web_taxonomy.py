@@ -1,6 +1,6 @@
 import unittest
 import threading
-import time
+import tempfile
 import urllib.request
 import urllib.error
 import json
@@ -11,28 +11,24 @@ from dms.web import make_handler
 class TestWebTaxonomy(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # Setup dummy records dir
-        cls.records_dir = Path("test_records_temp")
-        cls.records_dir.mkdir(exist_ok=True)
+        cls.temp_dir = tempfile.TemporaryDirectory(prefix="dms-web-test-")
+        cls.records_dir = Path(cls.temp_dir.name)
         
         # Start server in background thread
-        cls.port = 8123
         handler = make_handler(cls.records_dir)
-        cls.server = HTTPServer(("127.0.0.1", cls.port), handler)
+        cls.server = HTTPServer(("127.0.0.1", 0), handler)
+        cls.port = cls.server.server_port
         cls.thread = threading.Thread(target=cls.server.serve_forever)
         cls.thread.daemon = True
         cls.thread.start()
         
-        # Allow server to start
-        time.sleep(0.5)
 
     @classmethod
     def tearDownClass(cls):
         cls.server.shutdown()
         cls.server.server_close()
-        import shutil
-        if cls.records_dir.exists():
-            shutil.rmtree(cls.records_dir)
+        cls.thread.join()
+        cls.temp_dir.cleanup()
 
     def test_api_taxonomy_list(self):
         url = f"http://127.0.0.1:{self.port}/api/taxonomy"

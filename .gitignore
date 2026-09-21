@@ -24,3 +24,7 @@ Thumbs.db
 
 # Gemini/Antigravity agent data
 .gemini/
+
+# Web UI development
+frontend/node_modules/
+frontend/test-results/

@@ -45,6 +45,23 @@ pytest tests/ -v
 dms validate --dir examples/
 ```
 
+### Web UI Development
+
+The React interface uses real Kumo components and Kumo's standalone stylesheet. Source files are in `frontend/src/`; the generated assets in `dms/static/` are checked in so Python installations do not require Node.js.
+
+```bash
+cd frontend
+npm ci
+npm run build
+npm test
+npx playwright install chromium
+npm run test:browser
+```
+
+Browser tests start an isolated localhost server with temporary records and mock external API responses. They use the repository's `.venv/bin/python` when present, otherwise `python3`; set `PYTHON` to an absolute interpreter path to override it. Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` to use an existing Chromium installation. Screenshots are written to the ignored `frontend/test-results/` directory.
+
+After UI changes, include the rebuilt `dms/static/` assets in the same change. Python tests cover source normalization, cache and rate-limit behavior, schema validation, safe writes, and taxonomy endpoints. The schema itself remains the editor's source of truth.
+
 ## Pull Request Process
 
 1. **Fork** the repository

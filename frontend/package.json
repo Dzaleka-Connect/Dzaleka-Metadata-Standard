@@ -1,0 +1,21 @@
+{
+  "name": "dms-web",
+  "private": true,
+  "version": "1.2.0",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test src/records.test.js",
+    "test:browser": "node tests/browser.cjs"
+  },
+  "dependencies": {
+    "@cloudflare/kumo": "2.14.0",
+    "@phosphor-icons/react": "^2.1.10",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "playwright": "^1.58.0"
+  }
+}
