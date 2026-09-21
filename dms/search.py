@@ -9,11 +9,7 @@ import json
 from pathlib import Path
 from datetime import date
 
-from rich.console import Console
-from rich.table import Table
-from rich import box
-
-console = Console()
+from dms.style import console, make_table
 
 
 def load_records(dir_path: str | Path) -> list[tuple[str, dict]]:
@@ -141,15 +137,10 @@ def print_results(matches: list[tuple[str, dict]], show_description: bool = Fals
         console.print("  [yellow]No records matched your search.[/yellow]")
         return
 
-    table = Table(
-        title=f"Search Results ({len(matches)} found)",
-        box=box.ROUNDED,
-        show_header=True,
-        header_style="bold cyan",
-    )
-    table.add_column("File", style="white", min_width=16)
+    table = make_table(f"{len(matches)} found")
+    table.add_column("File", min_width=16)
     table.add_column("Title", style="bold", min_width=20, max_width=40)
-    table.add_column("Type", style="cyan", min_width=8)
+    table.add_column("Type", min_width=8)
     table.add_column("Language", justify="center", min_width=5)
     table.add_column("Creator", style="dim", min_width=16, max_width=30)
 

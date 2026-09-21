@@ -8,12 +8,7 @@ import json
 from pathlib import Path
 from collections import Counter
 
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich import box
-
-console = Console()
+from dms.style import console, heading, make_table
 
 
 def gather_stats(dir_path: str | Path) -> dict:
@@ -114,98 +109,53 @@ def gather_stats(dir_path: str | Path) -> dict:
 def print_stats(stats: dict) -> None:
     """Print a formatted statistics report to the console."""
 
-    # Header
+    heading("Collection")
+    console.print(f"  [dim]Records[/dim]   {stats['total']}")
+    console.print(f"  [dim]Valid[/dim]     [green]{stats['valid']}[/green]")
+    console.print(f"  [dim]Invalid[/dim]   [red]{stats['invalid']}[/red]")
     console.print()
-    console.print(Panel(
-        f"[bold bright_blue]Collection Statistics[/bold bright_blue]\n\n"
-        f"  Total records:   [cyan]{stats['total']}[/cyan]\n"
-        f"  Valid:           [green]{stats['valid']}[/green]\n"
-        f"  Invalid:         [red]{stats['invalid']}[/red]",
-        box=box.DOUBLE,
-        border_style="bright_blue",
-    ))
 
-    # By type
+    def _count_table(title: str, counter, columns: tuple[str, str]) -> None:
+        table = make_table(title)
+        table.add_column(columns[0], min_width=12)
+        table.add_column(columns[1], justify="right", min_width=8)
+        if title == "Type":
+            table.add_column("", style="green")
+            max_count = max(counter.values()) if counter else 1
+            for name, count in counter.most_common():
+                table.add_row(str(name), str(count), "█" * int(20 * count / max_count))
+        else:
+            for name, count in counter.most_common():
+                table.add_row(str(name), str(count))
+        console.print(table)
+
     if stats["by_type"]:
-        table = Table(
-            title="Records by Type",
-            box=box.ROUNDED,
-            show_header=True,
-            header_style="bold cyan",
-        )
-        table.add_column("Type", style="white", min_width=12)
-        table.add_column("Count", justify="right", style="cyan", min_width=8)
-        table.add_column("Bar", style="green")
-
-        max_count = max(stats["by_type"].values()) if stats["by_type"] else 1
-        for t, count in stats["by_type"].most_common():
-            bar = "█" * int(20 * count / max_count)
-            table.add_row(t, str(count), bar)
-        console.print(table)
-
-    # By language
+        _count_table("Type", stats["by_type"], ("Type", "Count"))
     if stats["by_language"]:
-        table = Table(
-            title="Records by Language",
-            box=box.ROUNDED,
-            show_header=True,
-            header_style="bold cyan",
-        )
-        table.add_column("Language", style="white", min_width=12)
-        table.add_column("Count", justify="right", style="cyan", min_width=8)
-        for lang, count in stats["by_language"].most_common():
-            table.add_row(lang, str(count))
-        console.print(table)
-
-    # By access level
+        _count_table("Language", stats["by_language"], ("Language", "Count"))
     if stats["by_access_level"]:
-        table = Table(
-            title="Records by Access Level",
-            box=box.ROUNDED,
-            show_header=True,
-            header_style="bold cyan",
-        )
-        table.add_column("Access Level", style="white", min_width=14)
-        table.add_column("Count", justify="right", style="cyan", min_width=8)
-        for level, count in stats["by_access_level"].most_common():
-            table.add_row(level, str(count))
-        console.print(table)
-
-    # Top subjects
+        _count_table("Access", stats["by_access_level"], ("Access level", "Count"))
     if stats["subjects_top"]:
-        table = Table(
-            title="Top 15 Subjects",
-            box=box.ROUNDED,
-            show_header=True,
-            header_style="bold cyan",
-        )
-        table.add_column("Subject", style="white", min_width=20)
-        table.add_column("Count", justify="right", style="cyan", min_width=8)
+        table = make_table("Subjects")
+        table.add_column("Subject", min_width=20)
+        table.add_column("Count", justify="right", min_width=8)
         for subj, count in stats["subjects_top"].most_common(15):
             table.add_row(subj, str(count))
         console.print(table)
-
-    # Top creators
     if stats["creators"]:
-        table = Table(
-            title="Contributors",
-            box=box.ROUNDED,
-            show_header=True,
-            header_style="bold cyan",
-        )
-        table.add_column("Creator", style="white", min_width=20)
-        table.add_column("Records", justify="right", style="cyan", min_width=8)
+        table = make_table("Contributors")
+        table.add_column("Creator", min_width=20)
+        table.add_column("Records", justify="right", min_width=8)
         for creator, count in stats["creators"].most_common(10):
             table.add_row(creator, str(count))
         console.print(table)
 
-    # Missing fields heatmap
     if stats["missing_fields"]:
         console.print()
-        console.print("[bold]Missing Recommended Fields:[/bold]")
+        console.print("  [bold]Missing recommended fields[/bold]")
         for field, count in stats["missing_fields"].most_common():
             pct = int(100 * count / stats["total"]) if stats["total"] else 0
-            bar = "░" * int(20 * count / stats["total"]) if stats["total"] else ""
-            console.print(f"  [yellow]{field:>12}[/yellow]  {count}/{stats['total']} ({pct}%)  {bar}")
+            bar = "·" * int(20 * count / stats["total"]) if stats["total"] else ""
+            console.print(f"  [dim]{field:>12}[/dim]  {count}/{stats['total']} ({pct}%)  {bar}")
 
     console.print()

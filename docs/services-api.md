@@ -6,13 +6,22 @@ The DMS Sources workspace reads published metadata from [Dzaleka Services](https
 
 | Collection | Upstream endpoint | Draft type |
 | --- | --- | --- |
+| Encyclopedia | `/api/encyclopedia` | From `entryType`: `document`, `site`, `event`, or `video` |
 | Public art | `/api/artworks` | `artwork` |
 | Photos | `/api/photos` | `photo` |
 | Events | `/api/events` | `event` |
 | Community stories | `/api/community-voices` | `story` |
 | Resources | `/api/resources` | `document` |
 | News | `/api/news` | `document` |
+| Poets | `/api/poets` | `document` |
+| Artists | `/api/artists` | `document` |
+| Dancers | `/api/dancers` | `document` |
+| Services | `/api/services` | `document` |
 | Places and sites | `/api/v1/spatial.json` | `site` |
+
+The encyclopedia list is paginated (`perPage=100`). The client follows numbered pages on `/api/encyclopedia` only, up to 20 pages. Encyclopedia portraits, poet and artist profile photos, and event illustrations are not treated as the digital file of the item. Contact fields such as email and WhatsApp are not copied into drafts. Encyclopedia `lastReviewed` is stored as `date.modified` when it is an ISO date. Related encyclopedia slugs become extra `references` relations.
+
+See also the [Encyclopedia API](https://services.dzaleka.com/encyclopedia/developers/).
 
 ## Local endpoints
 

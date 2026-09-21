@@ -11,10 +11,7 @@ from datetime import date
 from pathlib import Path
 
 import click
-from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
-from rich import box
+from rich.syntax import Syntax
 
 from dms.schema import (
     get_type_enum,
@@ -25,8 +22,7 @@ from dms.schema import (
     get_relation_types,
     get_schema_version,
 )
-
-console = Console()
+from dms.style import console
 
 
 def generate_record(output_path: str | Path | None = None, preset_type: str | None = None) -> dict:
@@ -39,13 +35,10 @@ def generate_record(output_path: str | Path | None = None, preset_type: str | No
     Returns:
         The generated record as a dict.
     """
-    console.print(Panel(
-        "[bold]DMS Record Generator[/bold]\n"
-        "Create a new Dzaleka Metadata Standard record.\n"
-        "Press Ctrl+C to cancel at any time.",
-        box=box.DOUBLE,
-        border_style="bright_blue",
-    ))
+    console.print()
+    console.print("  [bold]New record[/bold]")
+    console.print("  [dim]Create a DMS metadata record. Ctrl+C cancels.[/dim]")
+    console.print()
 
     record = {}
 
@@ -454,12 +447,8 @@ def generate_record(output_path: str | Path | None = None, preset_type: str | No
     record_json = json.dumps(record, indent=2, ensure_ascii=False)
 
     console.print()
-    console.print(Panel(
-        record_json,
-        title="[bold green]Generated DMS Record[/bold green]",
-        box=box.ROUNDED,
-        border_style="green",
-    ))
+    console.print("  [bold]Generated record[/bold]")
+    console.print(Syntax(record_json, "json", word_wrap=True, background_color="default"))
 
     if output_path:
         output_path = Path(output_path)

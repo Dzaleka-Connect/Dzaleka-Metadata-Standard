@@ -25,11 +25,13 @@ cd dzaleka-metadata-standard
 
 ```bash
 # Install in development mode (recommended)
-pip install -e .
+pip install -e ".[tui]"
 
-# Or install normally
-pip install .
+# Or install normally, with the terminal workspace extra
+pip install ".[tui]"
 ```
+
+The `[tui]` extra installs [Textual](https://textual.textualize.io/), used only by the full-screen workspace. Command-line tools such as `dms validate` work without it.
 
 ### 3. Verify the Installation
 
@@ -39,6 +41,14 @@ dms info
 ```
 
 You should see the DMS version and a table of schema fields.
+
+### 4. Open the terminal workspace
+
+```bash
+dms
+```
+
+On an interactive terminal this opens a full-screen workspace: a list of local records, an inspector, and a search prompt at the bottom. `dms tui --dir examples/` points it at the sample records. Press `F1` for shortcuts, `Ctrl+P` for the command palette, and `Q` to quit. The workspace is read-only.
 
 ---
 
@@ -57,7 +67,7 @@ This launches the Kumo-based app at `http://localhost:8080` where you can:
 - Validate a draft and review errors or warnings before saving locally.
 - Search records and attach canonical vocabulary references.
 - Import a DMS JSON record, or copy and download JSON and JSON-LD.
-- Load published Dzaleka Services collections and review imported drafts before saving.
+- Load published Dzaleka Services collections, including encyclopedia entries, and review imported drafts before saving.
 
 The app does not publish records or enforce the permissions described in rights fields. Keep the server bound to localhost and use filesystem permissions to protect sensitive records. External collections require internet access; the editor and vocabularies work offline.
 
@@ -114,21 +124,16 @@ This validates every `.json` file in the directory and shows a summary.
 
 **Valid record:**
 ```
-╭────────────────────────────────────╮
-│ ✓ VALID  examples/story.json       │
-╰────────────────────────────────────╯
-  ⚠ Recommended field 'Format' is not provided.
+  ✓  examples/story.json
+     !  Recommended field 'Format' is not provided.
 ```
 
 **Invalid record:**
 ```
-╭────────────────────────────────────╮
-│ ✗ INVALID  bad-record.json         │
-╰────────────────────────────────────╯
- Field            Issue
- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- Title            Value cannot be empty.
- Type             Invalid value 'unknown'. Allowed: story, ...
+  ✗  bad-record.json
+  Field            Issue
+  Title            Value cannot be empty.
+  Type             Invalid value 'unknown'. Allowed: story, ...
 ```
 
 **Errors** (❌) must be fixed — the record does not conform to the schema.
@@ -273,12 +278,36 @@ my-archive/
 
 ### `dms: command not found`
 
-Make sure you installed with `pip install -e .` and that your Python scripts directory is in your PATH:
+This project uses a virtualenv. There is often no `pip` on PATH — use the venv's Python:
 
 ```bash
-# Check where pip installs scripts
-python3 -m site --user-base
-# Add the bin directory to your PATH if needed
+source .venv/bin/activate
+python3 -m pip install -e ".[tui]"
+dms --version
+```
+
+Or run without activating:
+
+```bash
+.venv/bin/python -m pip install -e ".[tui]"
+.venv/bin/dms --version
+# from the repository, this also works:
+.venv/bin/python -m dms --version
+```
+
+### `ModuleNotFoundError: No module named 'dms'`
+
+On macOS with Python 3.13, files inside a `.venv` directory are marked hidden, and Python then skips the editable-install `.pth` file. Unhide it:
+
+```bash
+chflags nohidden .venv/lib/python3.13/site-packages/__editable__.*.pth
+chflags nohidden .venv/lib/python3.13/site-packages/__editable___*_finder.py
+```
+
+Or run the CLI as a module from the repository (this does not need the `.pth` file):
+
+```bash
+python3 -m dms tui --dir examples/
 ```
 
 ### `FileNotFoundError: DMS schema not found`

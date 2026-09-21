@@ -6,11 +6,12 @@ validating, and managing DMS metadata records. Uses only Python's
 built-in http.server — no additional dependencies required.
 
 Usage:
-    dms web                    # Start on port 8080
+    dms web                    # Start on port 8080, or the next free port
     dms web --port 3000        # Custom port
     dms web --dir records/     # Set records directory
 """
 
+import errno
 import json
 import os
 import tempfile
@@ -527,27 +528,50 @@ def make_handler(records_dir: Path):
     return DMSHandler
 
 
-def start_server(port: int = 8080, records_dir: str | Path = "records", open_browser: bool = True):
+def bind_local_server(handler, port: int, fallback: bool = False) -> ThreadingHTTPServer:
+    """Bind 127.0.0.1 to port, or the next free ports when fallback is enabled."""
+    last_error: OSError | None = None
+    last_port = port + (20 if fallback else 0)
+    for candidate in range(port, last_port + 1):
+        try:
+            return ThreadingHTTPServer(("127.0.0.1", candidate), handler)
+        except OSError as error:
+            last_error = error
+            if error.errno not in (errno.EADDRINUSE, errno.EACCES):
+                raise
+    hint = f" Try dms web --port {port + 1}." if not fallback else " Stop the other process, or pass dms web --port PORT."
+    raise OSError(errno.EADDRINUSE, f"Port {port} is already in use.{hint}") from last_error
+
+
+def start_server(port: int | None = None, records_dir: str | Path = "records", open_browser: bool = True):
     """Start the DMS web UI server.
 
     Args:
-        port: Port to listen on.
+        port: Port to listen on. None uses 8080 and falls forward if that port is busy.
         records_dir: Directory for saving records.
         open_browser: Whether to auto-open the browser.
     """
     records_path = Path(records_dir).resolve()
     records_path.mkdir(parents=True, exist_ok=True)
 
+    preferred = 8080 if port is None else port
     handler = make_handler(records_path)
-    server = ThreadingHTTPServer(("127.0.0.1", port), handler)
+    try:
+        server = bind_local_server(handler, preferred, fallback=port is None)
+    except OSError as error:
+        console.print(f"\n  [red]{error.strerror}[/red]\n")
+        raise SystemExit(1) from error
 
-    url = f"http://127.0.0.1:{port}"
+    bound = server.server_port
+    url = f"http://127.0.0.1:{bound}"
 
     console.print()
-    console.print(f"  [bold bright_blue]DMS Web UI[/bold bright_blue]")
-    console.print(f"  [dim]Records directory:[/dim] {records_path}")
-    console.print(f"  [dim]Server running at:[/dim] [bold cyan]{url}[/bold cyan]")
-    console.print(f"  [dim]Press Ctrl+C to stop.[/dim]")
+    console.print("  [bold]DMS web[/bold]")
+    console.print(f"  [dim]Records[/dim]   {records_path}")
+    console.print(f"  [dim]Server[/dim]    {url}")
+    if bound != preferred:
+        console.print(f"  [dim]Port {preferred} was already in use.[/dim]")
+    console.print("  [dim]Press Ctrl+C to stop.[/dim]")
     console.print()
 
     if open_browser:
@@ -557,4 +581,6 @@ def start_server(port: int = 8080, records_dir: str | Path = "records", open_bro
         server.serve_forever()
     except KeyboardInterrupt:
         console.print("\n  [yellow]Server stopped.[/yellow]")
+    finally:
+        server.server_close()
         server.server_close()

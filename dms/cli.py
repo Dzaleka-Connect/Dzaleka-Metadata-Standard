@@ -2,6 +2,8 @@
 DMS Command-Line Interface
 
 Usage:
+    dms                                  Open the full-screen terminal workspace
+    dms tui [--dir DIR] [--light]        Same workspace, with options
     dms init [--type TYPE] [--output FILE]   Create a new DMS record interactively
     dms validate FILE                        Validate a JSON file against the DMS schema
     dms validate --dir DIRECTORY             Validate all JSON files in a directory
@@ -16,22 +18,45 @@ Usage:
     dms info                                 Show schema version and field summary
 """
 
+import sys
+
 import click
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich import box
 
-from dms import __version__, __schema_version__
-
-console = Console()
+from dms import __version__
+from dms.style import console, heading, make_table
 
 
-@click.group()
+def launch_workspace(directory: str = "records", light: bool = False) -> None:
+    """Open the full-screen workspace, or explain how to install it."""
+    if not (sys.stdin.isatty() and sys.stdout.isatty()):
+        raise click.ClickException(
+            "The terminal workspace needs an interactive terminal. "
+            "Use dms search, dms validate, or dms info for text output."
+        )
+    try:
+        from dms.terminal import DMSApp
+    except ModuleNotFoundError as error:
+        if error.name != "textual":
+            raise
+        raise click.ClickException(
+            'Install the terminal extra: python -m pip install "dzaleka-metadata-standard[tui]"'
+        ) from error
+    DMSApp(directory, light=light).run()
+
+
+@click.group(invoke_without_command=True)
 @click.version_option(__version__, prog_name="dms")
-def main():
-    """Dzaleka Metadata Standard — CLI tools for heritage metadata."""
-    pass
+@click.pass_context
+def main(ctx):
+    """Dzaleka Metadata Standard — CLI tools for heritage metadata.
+
+    Run with no arguments in a terminal to open the full-screen workspace.
+    """
+    if ctx.invoked_subcommand is None:
+        if sys.stdin.isatty() and sys.stdout.isatty():
+            launch_workspace()
+        else:
+            click.echo(ctx.get_help())
 
 
 # ─── init ────────────────────────────────────────────────────────────────────
@@ -314,39 +339,24 @@ def info():
         get_access_levels,
     )
 
+    heading("DMS", "Dzaleka Metadata Standard")
+    console.print(f"  [dim]CLI[/dim]       {__version__}")
+    console.print(f"  [dim]Schema[/dim]    {get_schema_version()}")
     console.print()
-    console.print(Panel(
-        f"[bold bright_blue]Dzaleka Metadata Standard (DMS)[/bold bright_blue]\n"
-        f"[dim]An open-source metadata standard for documenting\n"
-        f"and sharing Dzaleka's digital heritage.[/dim]\n\n"
-        f"  CLI version:    [cyan]{__version__}[/cyan]\n"
-        f"  Schema version: [cyan]{get_schema_version()}[/cyan]",
-        box=box.DOUBLE,
-        border_style="bright_blue",
-    ))
 
     required = set(get_required_fields())
-    descriptions = get_field_descriptions()
-
-    table = Table(
-        title="Schema Fields",
-        box=box.ROUNDED,
-        show_header=True,
-        header_style="bold cyan",
-    )
-    table.add_column("Field", style="white", min_width=16)
+    table = make_table()
+    table.add_column("Field", min_width=16)
     table.add_column("Required", justify="center", min_width=10)
     table.add_column("Description", style="dim")
-
-    for field, desc in descriptions.items():
-        req = "[bold green]✓ Yes[/bold green]" if field in required else "[dim]No[/dim]"
+    for field, desc in get_field_descriptions().items():
+        req = "[green]yes[/green]" if field in required else "[dim]no[/dim]"
         table.add_row(field, req, desc)
-
     console.print(table)
 
-    console.print(f"\n  [bold]Heritage Types:[/bold] {', '.join(get_type_enum())}")
-    console.print(f"  [bold]Creator Roles:[/bold] {', '.join(get_creator_roles())}")
-    console.print(f"  [bold]Access Levels:[/bold] {', '.join(get_access_levels())}")
+    console.print(f"\n  [dim]Types[/dim]     {', '.join(get_type_enum())}")
+    console.print(f"  [dim]Roles[/dim]     {', '.join(get_creator_roles())}")
+    console.print(f"  [dim]Access[/dim]    {', '.join(get_access_levels())}")
     console.print()
 
 # ─── sync ──────────────────────────────────────────────────────────────────────
@@ -377,7 +387,7 @@ def sync(directory, remote, message):
 # ─── web ─────────────────────────────────────────────────────────────────────
 
 @main.command()
-@click.option("-p", "--port", type=int, default=8080, help="Port to run the web server on.")
+@click.option("-p", "--port", type=int, default=None, help="Port to listen on. Default 8080; if that port is busy, the next free port is used.")
 @click.option("-d", "--dir", "directory", type=click.Path(), default="records", help="Directory for saving records.")
 @click.option("--no-open", is_flag=True, default=False, help="Don't auto-open the browser.")
 def web(port, directory, no_open):
@@ -396,6 +406,20 @@ def web(port, directory, no_open):
     """
     from dms.web import start_server
     start_server(port=port, records_dir=directory, open_browser=not no_open)
+
+
+@main.command()
+@click.option("-d", "--dir", "directory", type=click.Path(file_okay=False), default="records", show_default=True,
+              help="Directory of local JSON records to inspect.")
+@click.option("--light", is_flag=True, help="Start with the light terminal theme.")
+def tui(directory, light):
+    """Open the full-screen, read-only terminal workspace.
+
+    Browse records, validation results, vocabularies, and schema fields.
+    Existing CLI commands remain available for scripts and file changes.
+    Running `dms` with no arguments opens the same workspace.
+    """
+    launch_workspace(directory, light=light)
 
 
 if __name__ == "__main__":
