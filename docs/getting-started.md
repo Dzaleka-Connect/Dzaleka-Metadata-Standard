@@ -6,7 +6,7 @@
 
 ## Prerequisites
 
-- **Python 3.9 or newer** — Check with `python3 --version`
+- **Python 3.10 or newer**. Check with `python3 --version`.
 - **pip** — Python package manager (usually included with Python)
 - **Git** — For cloning the repository
 
@@ -46,17 +46,20 @@ You should see the DMS version and a table of schema fields.
 
 ### The Built-in Web UI (Recommended)
 
-The easiest, most robust way to create and manage records is using the local DMS Vault web interface:
+To create and manage records in a browser, start the local DMS workspace:
 
 ```bash
 dms web --port 8080 --dir records/
 ```
 
-This launches a premium, dark-themed local web app at `http://localhost:8080` where you can:
-- Fill out metadata fields via a beautiful, structured GUI
-- Get live validation feedback against the schema
-- Add multi-value creators and subject tags effortlessly
-- Copy and export raw JSON or JSON-LD
+This launches the Kumo-based app at `http://localhost:8080` where you can:
+- Edit every DMS schema field, including rights, consent, technical metadata, and typed relations.
+- Validate a draft and review errors or warnings before saving locally.
+- Search records and attach canonical vocabulary references.
+- Import a DMS JSON record, or copy and download JSON and JSON-LD.
+- Load published Dzaleka Services collections and review imported drafts before saving.
+
+The app does not publish records or enforce the permissions described in rights fields. Keep the server bound to localhost and use filesystem permissions to protect sensitive records. External collections require internet access; the editor and vocabularies work offline.
 
 The CLI wizard now also supports richer v1.1 fields such as structured subject references,
 technical metadata, consent/sensitivity metadata, and typed relations.

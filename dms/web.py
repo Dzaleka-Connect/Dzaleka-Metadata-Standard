@@ -12,23 +12,29 @@ Usage:
 """
 
 import json
+import os
+import tempfile
 import uuid
 import webbrowser
 from datetime import date
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from threading import Lock
+from urllib.parse import parse_qs, urlparse, unquote
 
 from rich.console import Console
+from dms import __version__
 
 console = Console()
 
 TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
+STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 
 def get_schema_info() -> dict:
     """Gather schema metadata for the web UI."""
     from dms.schema import (
+        load_schema,
         get_schema_version,
         get_type_enum,
         get_creator_roles,
@@ -41,6 +47,7 @@ def get_schema_info() -> dict:
         get_field_descriptions,
     )
     return {
+        "schema": load_schema(),
         "version": get_schema_version(),
         "types": get_type_enum(),
         "roles": get_creator_roles(),
@@ -56,9 +63,12 @@ def get_schema_info() -> dict:
 
 def make_handler(records_dir: Path):
     """Create a request handler class with the given records directory."""
+    from dms.services import ServicesClient
+    services = ServicesClient()
+    save_lock = Lock()
 
     class DMSHandler(BaseHTTPRequestHandler):
-        server_version = "DMSVault/1.1"
+        server_version = f"DMS/{__version__}"
         sys_version = ""
 
         def log_message(self, format, *args):
@@ -72,6 +82,16 @@ def make_handler(records_dir: Path):
                 f"http://localhost:{port}",
             }
 
+        def _host_is_allowed(self) -> bool:
+            port = self.server.server_port
+            hosts = {f"127.0.0.1:{port}", f"localhost:{port}"}
+            if port == 80:
+                hosts.update({"127.0.0.1", "localhost"})
+            if self.headers.get("Host", "").lower() in hosts:
+                return True
+            self._send_json({"error": "Use the localhost address to access DMS."}, 403)
+            return False
+
         def _request_origin(self) -> str | None:
             origin = self.headers.get("Origin")
             if origin:
@@ -81,7 +101,10 @@ def make_handler(records_dir: Path):
             if referer:
                 parsed = urlparse(referer)
                 if parsed.scheme and parsed.hostname:
-                    port = parsed.port or (443 if parsed.scheme == "https" else 80)
+                    try:
+                        port = parsed.port or (443 if parsed.scheme == "https" else 80)
+                    except ValueError:
+                        return "invalid"
                     return f"{parsed.scheme}://{parsed.hostname}:{port}"
             return None
 
@@ -91,7 +114,7 @@ def make_handler(records_dir: Path):
                 return True
             return origin in self._allowed_local_origins()
 
-        def _send_bytes(self, body: bytes, content_type: str, status: int = 200):
+        def _send_bytes(self, body: bytes, content_type: str, status: int = 200, headers=None):
             self.send_response(status)
             self.send_header("Content-Type", content_type)
             self.send_header("Content-Length", str(len(body)))
@@ -104,19 +127,21 @@ def make_handler(records_dir: Path):
             self.send_header(
                 "Content-Security-Policy",
                 "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; "
-                "script-src 'self' 'unsafe-inline'; connect-src 'self'; object-src 'none'; "
+                "script-src 'self'; connect-src 'self'; object-src 'none'; "
                 "base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
             )
             origin = self._request_origin()
+            for name, value in (headers or {}).items():
+                self.send_header(name, str(value))
             if origin and origin in self._allowed_local_origins():
                 self.send_header("Access-Control-Allow-Origin", origin)
                 self.send_header("Vary", "Origin")
             self.end_headers()
             self.wfile.write(body)
 
-        def _send_json(self, data: dict | list, status: int = 200):
+        def _send_json(self, data: dict | list, status: int = 200, headers=None):
             body = json.dumps(data, indent=2, ensure_ascii=False).encode("utf-8")
-            self._send_bytes(body, "application/json; charset=utf-8", status=status)
+            self._send_bytes(body, "application/json; charset=utf-8", status=status, headers=headers)
 
         def _send_html(self, html: str, status: int = 200):
             body = html.encode("utf-8")
@@ -189,6 +214,8 @@ def make_handler(records_dir: Path):
             self._send_json(term_info)
 
         def do_GET(self):
+            if not self._host_is_allowed():
+                return
             parsed = urlparse(self.path)
             path = parsed.path
             query = parse_qs(parsed.query)
@@ -202,6 +229,40 @@ def make_handler(records_dir: Path):
 
             elif path == "/api/schema":
                 self._send_json(get_schema_info())
+
+            elif path.startswith("/static/"):
+                filename = path.removeprefix("/static/")
+                content_types = {"app.js": "text/javascript", "app.css": "text/css",
+                                 "app.js.LEGAL.txt": "text/plain", "app.css.LEGAL.txt": "text/plain",
+                                 "licenses.txt": "text/plain"}
+                asset = STATIC_DIR / filename
+                if filename not in content_types or not asset.is_file():
+                    self._send_json({"error": "Asset not found."}, 404)
+                    return
+                self._send_bytes(asset.read_bytes(), content_types[filename] + "; charset=utf-8")
+
+            elif path == "/api/sources" or path.startswith("/api/sources/"):
+                from dms.services import ServicesError, collection_list, source_to_draft
+                if not self._origin_is_allowed():
+                    self._send_json({"error": "Cross-origin requests are not allowed."}, 403)
+                    return
+                if path == "/api/sources":
+                    self._send_json({"collections": collection_list()})
+                    return
+                collection = path.removeprefix("/api/sources/")
+                try:
+                    entries, cached = services.fetch(collection)
+                    identifier = query.get("id", [None])[0]
+                    if identifier is not None:
+                        entry = next((item for item in entries if item["identifier"] == identifier), None)
+                        if entry is None:
+                            raise ServicesError("Source item not found.", 404)
+                        self._send_json({"draft": source_to_draft(entry)})
+                        return
+                    self._send_json({"items": entries, "cached": cached})
+                except ServicesError as error:
+                    self._send_json({"error": str(error), "retry_after": error.retry_after}, error.status,
+                                    {"Retry-After": error.retry_after} if error.retry_after else None)
 
             elif path == "/api/records":
                 records = []
@@ -247,6 +308,9 @@ def make_handler(records_dir: Path):
 
                 # /api/taxonomy/<voc>
                 voc = parts[2]
+                if voc not in get_vocabulary_list():
+                    self._send_json({"error": "Vocabulary not found."}, 404)
+                    return
                 if len(parts) == 3:
                     try:
                         if not ids and not search_query and limit is None and offset == 0 and not include_deprecated:
@@ -269,7 +333,7 @@ def make_handler(records_dir: Path):
                 sub = parts[3]
                 if sub == "terms":
                     if len(parts) == 5:
-                        term_info = get_term_info(voc, parts[4])
+                        term_info = get_term_info(voc, unquote(parts[4]))
                         if not term_info:
                             self.send_error(404, f"Term '{parts[4]}' not found in '{voc}'.")
                             return
@@ -330,6 +394,8 @@ def make_handler(records_dir: Path):
                 self.send_error(404)
 
         def do_POST(self):
+            if not self._host_is_allowed():
+                return
             parsed = urlparse(self.path)
             path = parsed.path
 
@@ -337,12 +403,20 @@ def make_handler(records_dir: Path):
                 self._send_json({"error": "Cross-origin requests are not allowed."}, 403)
                 return
 
-            content_length = int(self.headers.get("Content-Length", 0))
+            try:
+                content_length = int(self.headers.get("Content-Length", 0))
+            except ValueError:
+                self._send_json({"error": "Invalid Content-Length."}, 400)
+                return
+            if content_length < 0 or content_length > 1024 * 1024:
+                self.close_connection = True
+                self._send_json({"error": "Records must be smaller than 1 MB."}, 413)
+                return
             body = self.rfile.read(content_length)
 
             try:
                 data = json.loads(body) if body else {}
-            except json.JSONDecodeError:
+            except (json.JSONDecodeError, UnicodeDecodeError):
                 self._send_json({"error": "Invalid JSON"}, 400)
                 return
 
@@ -369,18 +443,40 @@ def make_handler(records_dir: Path):
                     }, 400)
                     return
 
-                records_dir.mkdir(parents=True, exist_ok=True)
                 warnings = get_warnings(data)
-                rec_type = data.get("type", "record")
-                rec_id = data.get("id", str(uuid.uuid4()))[:8]
-                filename = f"{rec_type}_{rec_id}.json"
-                filepath = records_dir / filename
-
-                # Remove internal fields
                 clean = {k: v for k, v in data.items() if not k.startswith("_")}
-                with open(filepath, "w", encoding="utf-8") as f:
-                    json.dump(clean, f, indent=2, ensure_ascii=False)
-                    f.write("\n")
+                try:
+                    with save_lock:
+                        records_dir.mkdir(parents=True, exist_ok=True)
+                        # Identity, not type or a shortened UUID, determines updates.
+                        filepath = records_dir / f"{uuid.UUID(data['id'])}.json"
+                        for candidate in sorted(records_dir.glob("*.json")):
+                            if candidate.is_symlink():
+                                continue
+                            try:
+                                existing = json.loads(candidate.read_text(encoding="utf-8"))
+                                if isinstance(existing, dict) and existing.get("id") == data["id"]:
+                                    filepath = candidate
+                                    break
+                            except (OSError, ValueError):
+                                continue
+                        temporary = None
+                        try:
+                            with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=records_dir,
+                                                             prefix=".dms-", suffix=".tmp", delete=False) as f:
+                                temporary = Path(f.name)
+                                json.dump(clean, f, indent=2, ensure_ascii=False)
+                                f.write("\n")
+                                f.flush()
+                                os.fsync(f.fileno())
+                            temporary.replace(filepath)
+                        finally:
+                            if temporary is not None:
+                                temporary.unlink(missing_ok=True)
+                except OSError:
+                    self._send_json({"saved": False, "error": "Cannot write to the records directory."}, 500)
+                    return
+                filename = filepath.name
 
                 console.print(f"  [green]✓ Saved:[/green] {filepath}")
                 self._send_json({
@@ -392,6 +488,11 @@ def make_handler(records_dir: Path):
 
             elif path == "/api/export-jsonld":
                 from dms.exporter import record_to_jsonld
+                from dms.validator import validate_record
+                errors = validate_record(data)
+                if errors:
+                    self._send_json({"error": "Validate the record before exporting JSON-LD.", "errors": errors}, 400)
+                    return
                 try:
                     jsonld = record_to_jsonld(data)
                     self._send_json(jsonld)
@@ -402,6 +503,8 @@ def make_handler(records_dir: Path):
                 self.send_error(404)
 
         def do_OPTIONS(self):
+            if not self._host_is_allowed():
+                return
             if not self._origin_is_allowed():
                 self._send_json({"error": "Cross-origin requests are not allowed."}, 403)
                 return
@@ -436,7 +539,7 @@ def start_server(port: int = 8080, records_dir: str | Path = "records", open_bro
     records_path.mkdir(parents=True, exist_ok=True)
 
     handler = make_handler(records_path)
-    server = HTTPServer(("127.0.0.1", port), handler)
+    server = ThreadingHTTPServer(("127.0.0.1", port), handler)
 
     url = f"http://127.0.0.1:{port}"
 

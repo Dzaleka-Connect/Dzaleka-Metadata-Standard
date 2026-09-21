@@ -137,17 +137,17 @@ def _term_short_id(term_id: str) -> str:
 def infer_vocabulary_from_identifier(identifier: str) -> str | None:
     """Infer a managed DMS vocabulary name from a compact DMS term identifier."""
     raw = str(identifier or "")
-    if "type/" in raw:
+    if raw.startswith("dms:type/"):
         return "types"
-    if "role/" in raw:
+    if raw.startswith("dms:role/"):
         return "roles"
-    if "access/" in raw:
+    if raw.startswith("dms:access/"):
         return "access_levels"
-    if "relation-type/" in raw:
+    if raw.startswith("dms:relation-type/"):
         return "relation_types"
-    if "consent/" in raw:
+    if raw.startswith("dms:consent/"):
         return "consent_statuses"
-    if "sensitivity/" in raw:
+    if raw.startswith("dms:sensitivity/"):
         return "sensitivity_markers"
     return None
 
