@@ -122,7 +122,7 @@ def test_failed_atomic_write_keeps_previous_record(server):
         path = server[1] / json.load(response)["file"]
     original = path.read_text()
     data["title"] = "Changed"
-    with patch("dms.web.os.fsync", side_effect=OSError("disk full")):
+    with patch("dms.services.os.fsync", side_effect=OSError("disk full")):
         with pytest.raises(HTTPError) as error:
             request(server, "/api/save", data)
         assert error.value.code == 500

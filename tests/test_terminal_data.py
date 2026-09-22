@@ -10,6 +10,7 @@ from dms.terminal_data import (
     display_text,
     read_collection,
     resolve_schema_field,
+    review_gaps,
 )
 
 EXAMPLES_DIR = Path(__file__).parent.parent / "examples"
@@ -84,7 +85,16 @@ def test_record_entry_filters():
     assert story.matches("", "story")
     assert not story.matches("", "poem")
     review_hits = [entry for entry in entries if entry.matches("", "all", review_only=True)]
-    assert all(entry.errors or entry.warnings for entry in review_hits)
+    assert all(entry.errors or entry.warnings or entry.gaps for entry in review_hits)
+
+
+def test_review_gaps_cover_language_description_and_consent():
+    assert review_gaps({"title": "Untitled"}) == [
+        "Language is not recorded.",
+        "Description is empty.",
+        "Consent status is unknown.",
+    ]
+    assert review_gaps({"language": "en", "description": "A story.", "rights": {"consent_status": "obtained"}}) == []
 
 
 def test_resolve_schema_field_merges_ref():

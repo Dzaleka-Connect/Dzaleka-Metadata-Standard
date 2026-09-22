@@ -11,24 +11,25 @@ import './styles.css';
 import Editor from './Editor.jsx';
 import Vocabulary from './Vocabulary.jsx';
 import Sources from './Sources.jsx';
-import { api, newRecord, cleanRecord, setField, addTerm, download, label } from './records.js';
+import { api, newRecord, cleanRecord, setField, addTerm, download, label, reviewGaps } from './records.js';
 
 const navigation = [['overview', 'Overview', HouseIcon], ['records', 'Records', FilesIcon],
   ['editor', 'Editor', PencilSimpleIcon], ['vocabulary', 'Vocabulary', TreeStructureIcon], ['sources', 'Sources', GlobeHemisphereEastIcon]];
 
-function Records({ records, types, onEdit, onPreview, onNew }) {
+function Records({ records, types, reviewOnly, onReviewOnly, onEdit, onPreview, onNew }) {
   const [query, setQuery] = useState('');
   const search = useDeferredValue(query.toLowerCase());
   const [type, setType] = useState('');
-  const visible = records.filter(record => (!type || record.type === type) &&
+  const visible = records.filter(record => (!type || record.type === type) && (!reviewOnly || reviewGaps(record).length) &&
     [record.title, record.description, ...(record.subject || []), ...(record.creator || []).map(creator => creator.name)].join(' ').toLowerCase().includes(search));
   return <><div className="toolbar"><Input label="Search records" placeholder="Title, creator, or keyword" value={query} onChange={event => setQuery(event.target.value)} />
     <Select label="Record type" value={type} items={{ '': 'All types', ...Object.fromEntries(types.map(type => [type, label(type)])) }} onValueChange={value => setType(value || '')} />
+    {onReviewOnly && <Button variant={reviewOnly ? 'primary' : 'secondary'} aria-pressed={!!reviewOnly} onClick={() => onReviewOnly(!reviewOnly)}>Needs review</Button>}
   </div><p className="list-caption">{visible.length} of {records.length} records</p>
     {visible.length ? <div className="table-scroll"><table><thead><tr><th>Title</th><th>Type</th><th>Language</th><th>Access</th><th><span className="sr-only">Actions</span></th></tr></thead><tbody>
       {visible.map((record, i) => <tr key={record._file || `${record.id}-${i}`}><td><button className="record-title" onClick={() => onPreview(record)}>{record.title || 'Untitled record'}</button>
         <p className="muted">{record.creator?.map(creator => creator.name).join(', ') || 'Creator not recorded'}</p></td>
-        <td><Badge variant="secondary">{record.type || 'Not set'}</Badge></td><td>{record.language || 'Not set'}</td>
+        <td><Badge variant="secondary">{record.type || 'Not set'}</Badge></td><td>{record.language || 'Not set'}{reviewOnly && reviewGaps(record).length ? <p className="muted">{reviewGaps(record).join(' ')}</p> : null}</td>
         <td>{record.rights?.access_level || 'Not set'}</td><td><Button variant="secondary" onClick={() => onEdit(record)}>Edit<span className="sr-only"> {record.title}</span></Button></td></tr>)}
     </tbody></table></div> : <div className="empty-state"><h2>{records.length ? 'No matching records' : 'Your collection starts here'}</h2>
       <p>{records.length ? 'Try another keyword or record type.' : 'Describe a story, a place, or an object worth remembering.'}</p>
@@ -51,6 +52,7 @@ function App() {
   const [previewFeedback, setPreviewFeedback] = useState('');
   const [pending, setPending] = useState(null);
   const [retry, setRetry] = useState(0);
+  const [reviewOnly, setReviewOnly] = useState(false);
   const onUnload = useEffectEvent(event => { if (dirty) { event.preventDefault(); event.returnValue = ''; } });
   useEffect(() => { window.addEventListener('beforeunload', onUnload); return () => window.removeEventListener('beforeunload', onUnload); }, []);
   useEffect(() => {
@@ -123,7 +125,7 @@ function App() {
   }
   if (!info || !record) return <main className="boot"><h1>Dzaleka Metadata Standard</h1><p role="status">{notice?.message || 'Opening your workspace...'}</p>
     {notice && <Button variant="primary" onClick={() => { setNotice(null); setRetry(retry + 1); }}>Try again</Button>}</main>;
-  const reviewCount = records.filter(record => !record.rights?.consent_status || ['pending', 'unknown', 'withheld'].includes(record.rights.consent_status)).length;
+  const reviewCount = records.filter(record => reviewGaps(record).length).length;
   return <div className="app-shell"><a href="#main" className="skip-link">Skip to content</a>
     <aside className="sidebar"><a className="brand" href="#" onClick={event => { event.preventDefault(); changePage('overview'); }}><span className="brand-symbol" aria-hidden="true">D</span><span>DMS<small>Dzaleka Metadata Standard</small></span></a>
       <nav aria-label="Main navigation">{navigation.map(([id, title, Icon]) => <Button key={id} variant="ghost" className={`nav-button ${page === id ? 'active' : ''}`}
@@ -137,13 +139,13 @@ function App() {
         {page === 'overview' && <><section className="welcome"><div><p className="eyebrow">The Dzaleka collection</p><h1>Keep the story.<br />Keep the context.</h1><p>A workspace for describing the people, places, and creations that carry Dzaleka's heritage.</p><div className="actions">
           <Button variant="primary" onClick={create}>Create a record</Button><Button variant="secondary" onClick={() => changePage('sources')}>Explore sources</Button></div></div>
           <div className="heritage-mark" aria-hidden="true"><span /><span /><span /><span /><i>Dzaleka<br />Malawi</i></div></section>
-          <section className="stats" aria-label="Collection summary"><div><span>{records.length}</span><p>Saved records</p></div><div><span>{new Set(records.map(record => record.type).filter(Boolean)).size}</span><p>Heritage types</p></div><div><span>{new Set(records.map(record => record.language).filter(Boolean)).size}</span><p>Languages</p></div><div><span>{reviewCount}</span><p>Consent to review</p></div></section>
+          <section className="stats" aria-label="Collection summary"><div><span>{records.length}</span><p>Saved records</p></div><div><span>{new Set(records.map(record => record.type).filter(Boolean)).size}</span><p>Heritage types</p></div><div><span>{new Set(records.map(record => record.language).filter(Boolean)).size}</span><p>Languages</p></div><div><button type="button" className="stat-button" onClick={() => { setReviewOnly(true); changePage('records'); }}><span>{reviewCount}</span><p>Needs review</p></button></div></section>
           <section><div className="section-heading"><h2>Your collection</h2><Button variant="ghost" onClick={() => changePage('records')}>View all records</Button></div>
-            <Records records={records.slice(0, 5)} types={info.types} onEdit={edit} onPreview={record => setPreview(cleanRecord(record))} onNew={create} /></section>
+            <Records records={records.slice(0, 5)} types={info.types} reviewOnly={reviewOnly} onReviewOnly={setReviewOnly} onEdit={edit} onPreview={record => setPreview(cleanRecord(record))} onNew={create} /></section>
         </>}
         {page === 'records' && <><div className="page-heading"><div><p className="eyebrow">The local archive</p><h1>Records</h1><p>Find, review, and edit the descriptions in your collection.</p></div><Button variant="secondary" onClick={async () => {
           try { setRecords(await api('/api/records')); message('Records refreshed.'); } catch (error) { message(error.message, true); }
-        }}>Refresh records</Button></div><Records records={records} types={info.types} onEdit={edit} onPreview={record => setPreview(cleanRecord(record))} onNew={create} /></>}
+        }}>Refresh records</Button></div><Records records={records} types={info.types} reviewOnly={reviewOnly} onReviewOnly={setReviewOnly} onEdit={edit} onPreview={record => setPreview(cleanRecord(record))} onNew={create} /></>}
         {page === 'editor' && <Editor schema={info.schema} record={record} onChange={update} errors={errors} warnings={warnings} busy={busy} editing={editing}
           onSave={() => validate(true)} onValidate={() => validate()} onPreview={() => setPreview(cleanRecord(record))} onVocabulary={() => changePage('vocabulary')} />}
         {page === 'vocabulary' && <Vocabulary record={record} onEditor={() => changePage('editor')} onAdd={(term, scheme) => {

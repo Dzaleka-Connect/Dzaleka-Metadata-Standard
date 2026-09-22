@@ -36,6 +36,24 @@ def compact_path(path: Path, max_len: int = 42) -> str:
     return "…" + text[-(max_len - 1):]
 
 
+def review_gaps(record: dict | None) -> list[str]:
+    """Unfinished review work that can exist on an otherwise valid record."""
+    if not isinstance(record, dict):
+        return []
+    gaps = []
+    language = record.get("language")
+    if not isinstance(language, str) or not language.strip():
+        gaps.append("Language is not recorded.")
+    description = record.get("description")
+    if not isinstance(description, str) or not description.strip():
+        gaps.append("Description is empty.")
+    rights = record.get("rights") if isinstance(record.get("rights"), dict) else {}
+    consent = rights.get("consent_status")
+    if consent in (None, "", "unknown", "pending", "withheld"):
+        gaps.append(f"Consent status is {consent or 'unknown'}.")
+    return gaps
+
+
 @dataclass
 class RecordEntry:
     key: str
@@ -48,11 +66,15 @@ class RecordEntry:
         return display_text(self.record.get("title"), "Untitled record") if self.record is not None else self.key
 
     @property
+    def gaps(self) -> list[str]:
+        return review_gaps(self.record)
+
+    @property
     def status(self) -> str:
-        return "Invalid" if self.errors else "Review" if self.warnings else "Valid"
+        return "Invalid" if self.errors else "Review" if self.warnings or self.gaps else "Valid"
 
     def matches(self, query: str, record_type: str = "all", review_only: bool = False) -> bool:
-        if review_only and not (self.errors or self.warnings):
+        if review_only and not (self.errors or self.warnings or self.gaps):
             return False
         record = self.record or {}
         if record_type != "all" and record.get("type") != record_type:
@@ -64,7 +86,7 @@ def collection_counts(entries: list[RecordEntry]) -> tuple[int, int, int, int]:
     """Return total, schema-valid, invalid, and review-note counts."""
     total = len(entries)
     invalid = sum(1 for entry in entries if entry.errors)
-    review = sum(1 for entry in entries if not entry.errors and entry.warnings)
+    review = sum(1 for entry in entries if not entry.errors and (entry.warnings or entry.gaps))
     return total, total - invalid, invalid, review
 
 

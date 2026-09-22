@@ -3,11 +3,14 @@
 import copy
 import json
 import math
+import os
 import re
 import ssl
+import tempfile
 import time
 import uuid
 from datetime import date
+from pathlib import Path
 from threading import Lock
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urljoin, urlparse
@@ -119,17 +122,52 @@ def _encyclopedia_tags(data):
     return list(dict.fromkeys(tag for tag in tags if tag))
 
 
-def _encyclopedia_location(data):
+PLACE_FACTS = {"location", "based in"}
+
+
+def _fact_pairs(data):
     facts = data.get("facts")
     if not isinstance(facts, list):
-        return ""
+        return []
+    pairs = []
     for fact in facts:
         if not isinstance(fact, dict):
             continue
-        label = _text(fact.get("label")).casefold()
-        if label in {"location", "raised in", "based in"}:
-            return _text(fact.get("value"))
+        label, value = _text(fact.get("label")), _text(fact.get("value"))
+        if label and value:
+            pairs.append((label, value))
+    return pairs
+
+
+def _encyclopedia_location(data):
+    for label, value in _fact_pairs(data):
+        if label.casefold() in PLACE_FACTS:
+            return value
     return ""
+
+
+def _encyclopedia_notes(data):
+    return [f"{label}: {value}" for label, value in _fact_pairs(data) if label.casefold() not in PLACE_FACTS]
+
+
+def _citations(data):
+    sources = data.get("sources")
+    if not isinstance(sources, list):
+        return []
+    citations = []
+    for source in sources[:10]:
+        if not isinstance(source, dict):
+            continue
+        title, url = _text(source.get("title")), _safe_url(source.get("url"))
+        if not title and not url:
+            continue
+        citations.append({
+            "title": title or url,
+            "publisher": _text(source.get("publisher")),
+            "url": url,
+            "date": _text(source.get("date")),
+        })
+    return citations
 
 
 def _record_type(collection, data):
@@ -174,8 +212,12 @@ def normalize_collection(collection, payload):
             tags = list(dict.fromkeys(tags + _encyclopedia_tags(data)))
         location = _text(data.get("location")) or _text(data.get("birthplace")) or (
             _text(data.get("name")) if spatial else "")
-        if collection == "encyclopedia" and not location:
-            location = _encyclopedia_location(data)
+        if collection == "encyclopedia":
+            if not location:
+                location = _encyclopedia_location(data)
+            notes = _encyclopedia_notes(data)
+            if notes:
+                description = "\n".join([description, *notes]).strip()
         license_text = _license_text(data.get("license")) or _license_text(payload.get("license"))
         attribution = _text(payload.get("attribution"))
         payload_license = payload.get("license")
@@ -188,11 +230,11 @@ def normalize_collection(collection, payload):
             "creator": creator, "tags": tags, "location": location,
             "area": _text(data.get("zone")) or _text(data.get("campZone")),
             "source_date": (_text(data.get("date")) or _text(data.get("dateInstalled"))
-                            or _text(data.get("surveyDate")) or _text(data.get("datePublished"))
-                            or _text(data.get("lastReviewed"))),
+                            or _text(data.get("surveyDate")) or _text(data.get("datePublished"))),
             "reviewed": _text(data.get("lastReviewed")),
             "license": license_text, "attribution": attribution,
             "related": [],
+            "citations": _citations(data) if collection == "encyclopedia" else [],
         }
         related = data.get("relatedEntries")
         if isinstance(related, list):
@@ -252,6 +294,15 @@ def source_to_draft(entry):
             "relation_type": "references",
             "label": slug,
         })
+    for citation in entry.get("citations") or []:
+        target = citation.get("url") or citation.get("title")
+        if not target:
+            continue
+        relation = {"target": target, "relation_type": "references", "label": citation.get("title") or target}
+        note = ", ".join(part for part in (citation.get("publisher"), citation.get("date")) if part)
+        if note:
+            relation["note"] = note
+        record["relation_detail"].append(relation)
     raw_date = entry.get("source_date", "")
     if raw_date:
         try:
@@ -266,6 +317,109 @@ def source_to_draft(entry):
     return record
 
 
+def source_uris(record: dict) -> list[str]:
+    """Published-source URIs stored on a local record."""
+    targets = []
+    for relation in record.get("relation_detail") or []:
+        if not isinstance(relation, dict):
+            continue
+        target = relation.get("target")
+        if isinstance(target, str) and target.startswith(BASE_URL):
+            targets.append(target)
+    return targets
+
+
+def find_imported_source(directory: Path, source_uri: str, ignore: Path | None = None) -> Path | None:
+    """Return the local file that already cites this published source."""
+    if not source_uri or not directory.exists():
+        return None
+    ignored = ignore.resolve() if ignore is not None else None
+    for path in sorted(directory.glob("*.json")):
+        if path.is_symlink() or (ignored is not None and path.resolve() == ignored):
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(data, dict) and source_uri in source_uris(data):
+            return path
+    return None
+
+
+def write_local_record(directory: Path, record: dict) -> Path:
+    """Atomically write a record. Updates keep the existing filename."""
+    directory.mkdir(parents=True, exist_ok=True)
+    filepath = directory / f"{uuid.UUID(str(record['id']))}.json"
+    for candidate in sorted(directory.glob("*.json")):
+        if candidate.is_symlink():
+            continue
+        try:
+            existing = json.loads(candidate.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(existing, dict) and existing.get("id") == record["id"]:
+            filepath = candidate
+            break
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=directory, prefix=".dms-", suffix=".tmp", delete=False,
+        ) as handle:
+            temporary = Path(handle.name)
+            json.dump(record, handle, indent=2, ensure_ascii=False)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        temporary.replace(filepath)
+    finally:
+        if temporary is not None and temporary.exists():
+            temporary.unlink(missing_ok=True)
+    return filepath
+
+
+def cache_directory() -> Path:
+    override = os.environ.get("DMS_CACHE_DIR")
+    if override:
+        return Path(override)
+    base = os.environ.get("XDG_CACHE_HOME")
+    root = Path(base) if base else Path.home() / ".cache"
+    return root / "dms" / "sources"
+
+
+def _disk_cache_path(collection: str) -> Path:
+    return cache_directory() / f"{collection.replace('/', '')}.json"
+
+
+def _write_disk_cache(collection: str, entries: list) -> None:
+    path = _disk_cache_path(collection)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=path.parent, prefix=".dms-", suffix=".tmp", delete=False,
+        ) as handle:
+            temporary = Path(handle.name)
+            json.dump({"saved_at": date.today().isoformat(), "entries": entries}, handle)
+            handle.flush()
+            os.fsync(handle.fileno())
+        temporary.replace(path)
+    finally:
+        if temporary is not None and temporary.exists():
+            temporary.unlink(missing_ok=True)
+
+
+def _read_disk_cache(collection: str):
+    path = _disk_cache_path(collection)
+    if not path.is_file():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    entries = data.get("entries") if isinstance(data, dict) else None
+    return entries if isinstance(entries, list) else None
+
+
 def _request_path(collection, page=1):
     spec = COLLECTIONS[collection]
     if spec.get("paginated"):
@@ -278,6 +432,7 @@ class ServicesClient:
         self._cache = {}
         self._lock = Lock()
         self._retry_at = 0
+        self.offline = False
 
     def _read_json(self, path):
         request = Request(BASE_URL + path, headers={
@@ -307,16 +462,33 @@ class ServicesClient:
             now = time.monotonic()
             cached = self._cache.get(collection)
             if cached and now - cached[0] < CACHE_SECONDS:
+                self.offline = cached[2]
                 return copy.deepcopy(cached[1]), True
             if now < self._retry_at:
+                disk = _read_disk_cache(collection)
+                if disk is not None:
+                    self.offline = True
+                    self._cache[collection] = (now, disk, True)
+                    return copy.deepcopy(disk), True
                 raise ServicesError("Dzaleka Services is busy. Try again shortly.", 429, math.ceil(self._retry_at - now))
-            payload = self._read_json(_request_path(collection))
-            entries = normalize_collection(collection, payload)
-            if COLLECTIONS[collection].get("paginated"):
-                meta = payload.get("meta") if isinstance(payload.get("meta"), dict) else {}
-                total_pages = meta.get("totalPages")
-                if isinstance(total_pages, int) and total_pages > 1:
-                    for page in range(2, min(total_pages, MAX_PAGES) + 1):
-                        entries.extend(normalize_collection(collection, self._read_json(_request_path(collection, page))))
-            self._cache[collection] = (time.monotonic(), entries)
-            return copy.deepcopy(entries), False
+            try:
+                payload = self._read_json(_request_path(collection))
+                entries = normalize_collection(collection, payload)
+                if COLLECTIONS[collection].get("paginated"):
+                    meta = payload.get("meta") if isinstance(payload.get("meta"), dict) else {}
+                    total_pages = meta.get("totalPages")
+                    if isinstance(total_pages, int) and not isinstance(total_pages, bool) and total_pages > 1:
+                        for page in range(2, min(total_pages, MAX_PAGES) + 1):
+                            entries.extend(normalize_collection(collection, self._read_json(_request_path(collection, page))))
+                _write_disk_cache(collection, entries)
+                self.offline = False
+                self._cache[collection] = (time.monotonic(), entries, False)
+                return copy.deepcopy(entries), False
+            except ServicesError:
+                disk = _read_disk_cache(collection)
+                if disk is None:
+                    self.offline = False
+                    raise
+                self.offline = True
+                self._cache[collection] = (time.monotonic(), disk, True)
+                return copy.deepcopy(disk), True

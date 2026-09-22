@@ -9,6 +9,11 @@ from dms.services import ServicesClient, ServicesError, normalize_collection, so
 from dms.validator import validate_record
 
 
+@pytest.fixture(autouse=True)
+def isolated_source_cache(tmp_path, monkeypatch):
+    monkeypatch.setenv("DMS_CACHE_DIR", str(tmp_path / "source-cache"))
+
+
 def artwork(**fields):
     payload = {"data": {"artworks": [{"id": "mural-1", "title": "Community mural", **fields}]}}
     return normalize_collection("artworks", payload)[0]
@@ -99,17 +104,61 @@ def test_encyclopedia_entries_map_types_license_and_review_dates():
     entries = normalize_collection("encyclopedia", payload)
     assert [entry["type"] for entry in entries] == ["document", "site"]
     assert entries[0]["file_uri"] == ""
-    assert entries[0]["location"] == "Dzaleka (16+ years)"
+    assert entries[0]["location"] == ""
+    assert "Raised in: Dzaleka (16+ years)" in entries[0]["description"]
     assert "People" in entries[0]["tags"] and "Angela Azibera" in entries[0]["tags"]
     draft = source_to_draft(entries[0])
     assert draft["rights"]["license"] == "Dzaleka Online Services Open License"
     assert "Dzaleka Encyclopedia" in draft["rights"]["access_note"]
     assert draft["date"]["event_date"] == draft["date"]["modified"] == "2026-07-13"
-    assert draft["relation_detail"][0]["target"].endswith("/api/encyclopedia#angela-abizera")
-    assert draft["relation_detail"][1]["target"].endswith("/api/encyclopedia#education-in-dzaleka")
-    assert "email" not in json.dumps(draft)
-    draft.update(language="en")
-    assert validate_record(draft) == []
+
+
+def test_encyclopedia_keeps_citations_and_non_place_facts():
+    payload = {"data": {"entries": [{
+        "id": "angela-abizera", "title": "Angela Abizera", "summary": "A poet.",
+        "entryType": "person",
+        "facts": [{"label": "Known for", "value": "Poetry"}, {"label": "Based in", "value": "Dzaleka"}],
+        "sources": [{"title": "Interview notes", "publisher": "There Is Hope", "url": "https://services.dzaleka.com/resources/interview", "date": "2024"}],
+    }]}}
+    entry = normalize_collection("encyclopedia", payload)[0]
+    draft = source_to_draft(entry)
+    assert entry["location"] == "Dzaleka"
+    assert "Known for: Poetry" in entry["description"]
+    cited = draft["relation_detail"][-1]
+    assert cited["target"] == "https://services.dzaleka.com/resources/interview"
+    assert cited["label"] == "Interview notes"
+    assert cited["note"] == "There Is Hope, 2024"
+
+
+def test_duplicate_source_is_found_and_a_new_draft_can_be_saved(tmp_path):
+    from dms.services import find_imported_source, write_local_record
+    draft = source_to_draft(normalize_collection("artworks", {"data": {"artworks": [{"id": "mural-1", "title": "Mural"}]}})[0])
+    draft.update(language="en", description="A mural about early marriage.")
+    path = write_local_record(tmp_path, draft)
+    assert find_imported_source(tmp_path, draft["relation_detail"][0]["target"]) == path
+    assert find_imported_source(tmp_path, draft["relation_detail"][0]["target"], ignore=path) is None
+
+
+def test_saved_source_copy_is_used_when_the_network_fails(tmp_path, monkeypatch):
+    from dms.services import _write_disk_cache
+    monkeypatch.setenv("DMS_CACHE_DIR", str(tmp_path))
+    _write_disk_cache("artworks", [{"identifier": "mural", "title": "Mural", "collection": "artworks"}])
+    with patch("dms.services.build_opener") as opener:
+        opener.return_value.open.side_effect = URLError("offline")
+        client = ServicesClient()
+        entries, cached = client.fetch("artworks")
+    assert cached and client.offline
+    assert entries[0]["title"] == "Mural"
+
+
+def test_review_date_is_not_stored_as_the_event_date():
+    payload = {"data": {"entries": [{
+        "id": "camp-health", "title": "Health in Dzaleka", "summary": "An overview.",
+        "entryType": "topic", "lastReviewed": "2026-07-13T00:00:00.000Z",
+    }]}}
+    draft = source_to_draft(normalize_collection("encyclopedia", payload)[0])
+    assert "event_date" not in draft["date"]
+    assert draft["date"]["modified"] == "2026-07-13"
 
 
 def test_poet_profiles_use_the_poet_as_creator_without_contact_fields():

@@ -20,7 +20,15 @@ from textual.widgets import Button, DataTable, Footer, Input, Select, Static, Ta
 from dms import __schema_version__, __version__
 from dms.schema import get_type_enum, load_schema
 from dms.taxonomy import get_term_info, get_terms, get_vocabulary_list, load_taxonomy
-from dms.services import ServicesClient, ServicesError, collection_list, source_to_draft
+from dms.services import (
+    ServicesClient,
+    ServicesError,
+    collection_list,
+    find_imported_source,
+    source_to_draft,
+    write_local_record,
+)
+from dms.validator import validate_record
 from dms.terminal_data import (
     RecordEntry,
     collection_counts,
@@ -82,6 +90,7 @@ class HelpScreen(ModalScreen):
                     ("Ctrl+O", "View the overview"),
                     ("Y", "Copy selected JSON"),
                     ("G / g", "Jump to the last or first row"),
+                    ("Ctrl+S", "Save the selected source as a local draft"),
                     ("Ctrl+R", "Reload local records, or load the selected source"),
                     ("Ctrl+T", "Toggle light and dark themes"),
                     ("Escape", "Clear search, then return to the list"),
@@ -101,6 +110,52 @@ class HelpScreen(ModalScreen):
         self.dismiss()
 
 
+class SaveDraftScreen(ModalScreen):
+    """Confirm a source draft and record its language before writing a file."""
+
+    def __init__(self, draft: dict, existing: str = ""):
+        super().__init__()
+        self.draft = draft
+        self.existing = existing
+
+    def compose(self) -> ComposeResult:
+        with Vertical(id="help-dialog"):
+            yield Static("Save local draft", classes="dialog-title")
+            if self.existing:
+                yield Static(f"Already saved as {self.existing}. Open that record instead of creating another.", markup=False)
+                yield Button("Open existing record", id="open-existing", variant="primary")
+                yield Button("Cancel", id="cancel-save")
+            else:
+                yield Static(self.draft.get("title") or "Untitled", markup=False)
+                yield Static("Language is required. Use a code such as en, sw, fr, or rw.", markup=False)
+                yield Input(placeholder="en", id="draft-language")
+                yield Static("", id="save-errors", markup=False)
+                yield Button("Save draft", id="confirm-save", variant="primary")
+                yield Button("Cancel", id="cancel-save")
+
+    @on(Button.Pressed, "#cancel-save")
+    def cancel(self) -> None:
+        self.dismiss(None)
+
+    @on(Button.Pressed, "#open-existing")
+    def open_existing(self) -> None:
+        self.dismiss({"open": self.existing})
+
+    @on(Button.Pressed, "#confirm-save")
+    def confirm(self) -> None:
+        language = self.query_one("#draft-language", Input).value.strip()
+        draft = {**self.draft, "language": language}
+        if "language" in draft and not language:
+            draft.pop("language")
+        errors = validate_record(draft)
+        if errors:
+            self.query_one("#save-errors", Static).update("\n".join(
+                f"{error['field']}: {error['message']}" for error in errors[:6]
+            ))
+            return
+        self.dismiss(draft)
+
+
 class DMSApp(App):
     TITLE = "DMS"
     SUB_TITLE = "Dzaleka Metadata Standard"
@@ -110,6 +165,7 @@ class DMSApp(App):
         Binding("/", "search", "Search"),
         Binding("ctrl+p", "command_palette", "Commands", priority=True, show=False),
         Binding("ctrl+r", "reload", "Reload"),
+        Binding("ctrl+s", "save_draft", "Save", show=False),
         Binding("ctrl+j", "json", "JSON"),
         Binding("ctrl+e", "checks", "Checks"),
         Binding("ctrl+o", "overview", "Overview", show=False),
@@ -146,6 +202,7 @@ class DMSApp(App):
         self.selected_key: str | None = None
         self.generation = 0
         self.source_items: list[dict] = []
+        self.loaded_source = ""
         self.source_error = ""
         self.source_cached = False
         self.loading_sources = False
@@ -262,6 +319,7 @@ class DMSApp(App):
             ("Show JSON", "Inspect the selected item as JSON", self.action_json),
             ("Show checks and history", "Read validation results or term changes", self.action_checks),
             ("Copy JSON", "Copy the selected item JSON to the clipboard", self.action_copy_json),
+            ("Save source draft", "Write the selected source as a local record after validation", self.action_save_draft),
             ("Toggle theme", "Switch between the night and day palettes", self.action_toggle_theme),
             ("Keyboard shortcuts", "Show navigation and other DMS commands", self.action_help),
         ):
@@ -337,7 +395,11 @@ class DMSApp(App):
                 error += f" Retry in {exc.retry_after} seconds."
         if generation != self.source_generation:
             return
+        if str(self.query_one("#category", Select).value) != collection:
+            self.loading_sources = False
+            return
         self.source_items, self.source_cached, self.source_error = items, cached, error
+        self.loaded_source = "" if error else collection
         self.loading_sources = False
         self._drafts.clear()
         self._update_stats_line()
@@ -346,7 +408,8 @@ class DMSApp(App):
             if error:
                 self.notify(error, severity="warning")
             else:
-                self.notify(f"{len(items)} source items" + ("  ·  cached" if cached else ""))
+                note = "  ·  offline copy" if self._services and self._services.offline else ("  ·  cached" if cached else "")
+                self.notify(f"{len(items)} source items" + note)
 
     def switch_mode(self, mode: str, review: bool = False) -> None:
         self.workspace_mode, self.review_only, self.selected_key = mode, review, None
@@ -361,7 +424,7 @@ class DMSApp(App):
         elif mode == "sources":
             collections = collection_list()
             options = [(item["label"], item["id"]) for item in collections]
-            selected = self.source_items[0]["collection"] if self.source_items else collections[0]["id"]
+            selected = self.loaded_source or (collections[0]["id"] if collections else "encyclopedia")
         else:
             options = [("All vocabularies", "all"), *[(item.replace("_", " ").capitalize(), item) for item in get_vocabulary_list()]]
             selected = "all"
@@ -375,11 +438,11 @@ class DMSApp(App):
         for button in self.query(".nav"):
             button.set_class(button.id == f"nav-{'review' if review else mode}", "active")
         self.query_one("#details", TabbedContent).active = "overview"
-        self.syncing = False
         self.query_one("#composer-meta", Static).update(
             f"DMS {__version__}  ·  " + ("Ctrl+R loads sources" if mode == "sources" else "local only")
         )
         self._update_stats_line()
+        self.syncing = False
         self.refresh_list()
         self.action_focus_list()
 
@@ -421,11 +484,16 @@ class DMSApp(App):
         if not self.ready or self.syncing:
             return
         if self.workspace_mode == "sources" and isinstance(event, Select.Changed):
-            loaded = self.source_items[0]["collection"] if self.source_items else None
-            if str(event.value) != loaded:
+            # set_options announces the first choice before the restored one.
+            if str(event.value) != str(self.query_one("#category", Select).value):
+                return
+            if str(event.value) != self.loaded_source:
+                self.source_generation += 1
+                self.loading_sources = False
                 self.source_items = []
                 self.source_error = ""
                 self.source_cached = False
+                self.loaded_source = ""
                 self.selected_key = None
                 self._drafts.clear()
                 self._update_stats_line()
@@ -615,12 +683,13 @@ class DMSApp(App):
                 )),
             )
         content.extend([Text("\nRecord details", style="bold"), fields])
-        content.append(Text(f"\n{item.status}. {len(item.errors)} errors, {len(item.warnings)} review notes.", style="dim"))
-        checks = [Text(f"{len(item.errors)} errors  ·  {len(item.warnings)} review notes", style="bold")]
-        if not item.errors:
+        content.append(Text(f"\n{item.status}. {len(item.errors)} errors, {len(item.warnings)} review notes, {len(item.gaps)} gaps.", style="dim"))
+        checks = [Text(f"{len(item.errors)} errors  ·  {len(item.warnings)} review notes  ·  {len(item.gaps)} gaps", style="bold")]
+        if not item.errors and not item.gaps:
             checks.append(Text("\nPasses DMS schema and vocabulary validation."))
         checks.extend(Text(f"\n{display_text(error['field'])}\n{display_text(error['message'])}") for error in item.errors)
         checks.extend(Text(f"\nReview: {display_text(warning)}") for warning in item.warnings)
+        checks.extend(Text(f"\n{gap}") for gap in item.gaps)
         payload = record if item.record is not None else {"file": item.key, "errors": item.errors}
         return title, meta, content, checks, payload
 
@@ -638,10 +707,10 @@ class DMSApp(App):
             fields.add_row(Text("Tags"), Text(", ".join(display_text(tag) for tag in item["tags"])))
         fields.add_row(Text("Source"), Text(display_text(item.get("url") or item.get("source_uri"))))
         content.extend([Text("\nSource details", style="bold"), fields])
-        content.append(Text("\nDraft preview only. Import and review consent in dms web.", style="dim"))
+        content.append(Text("\nCtrl+S saves a local draft after you record the language. Consent stays unknown until you review it.", style="dim"))
         checks = [
-            Text("This workspace does not save source drafts.", style="bold"),
-            Text("\nCtrl+R loads the collection. Local records are never uploaded."),
+            Text("Ctrl+S saves this draft into the records folder.", style="bold"),
+            Text("\nNothing is uploaded. A source that is already saved is opened instead of copied."),
         ]
         identifier = display_text(item.get("identifier"), title)
         payload = self._drafts.setdefault(identifier, source_to_draft(item))
@@ -713,6 +782,40 @@ class DMSApp(App):
             return
         self.copy_to_clipboard(json.dumps(self.payload, indent=2, ensure_ascii=False, default=str))
         self.notify("Copied JSON")
+
+    def action_save_draft(self) -> None:
+        if self.workspace_mode != "sources" or not isinstance(self.catalog.get(self.selected_key or ""), dict):
+            self.notify("Select a source item, then press Ctrl+S.")
+            return
+        item = self.catalog[self.selected_key]
+        existing = find_imported_source(self.directory, item.get("source_uri", ""))
+        draft = dict(self.payload) if isinstance(self.payload, dict) else source_to_draft(item)
+        self.push_screen(
+            SaveDraftScreen(draft, existing.name if existing else ""),
+            self._finish_save,
+        )
+
+    def _finish_save(self, result) -> None:
+        if not result:
+            return
+        if isinstance(result, dict) and result.get("open"):
+            self._open_local(result["open"])
+            return
+        try:
+            path = write_local_record(self.directory, result)
+        except OSError as error:
+            self.notify(str(error), severity="error")
+            return
+        self.notify(f"Saved {path.name}")
+        self.generation += 1
+        self.loading_records = True
+        self.load_records(self.generation)
+
+    def _open_local(self, filename: str) -> None:
+        self.switch_mode("records")
+        if filename in self.catalog:
+            table = self.query_one("#items", DataTable)
+            table.move_cursor(row=list(self.catalog).index(filename))
 
     def action_help(self) -> None:
         self.push_screen(HelpScreen())

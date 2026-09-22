@@ -148,6 +148,31 @@ def test_sources_stay_idle_until_reload():
     asyncio.run(scenario())
 
 
+def test_loaded_source_survives_leaving_the_workspace():
+    async def scenario():
+        with patch("dms.terminal.ServicesClient") as client:
+            payload = {"data": {"poets": [{"id": "amissi", "title": "Amissi", "description": "A poet."}]}}
+            client.return_value.fetch.return_value = (normalize_collection("poets", payload), False)
+            app = DMSApp(EXAMPLES_DIR)
+            async with app.run_test(size=(120, 40)) as pilot:
+                await _wait_until(lambda: not app.loading_records)
+                await pilot.pause()
+                await pilot.press("ctrl+5")
+                await pilot.pause()
+                app.query_one("#category").value = "poets"
+                await pilot.pause()
+                await pilot.press("ctrl+r")
+                await _wait_until(lambda: not app.loading_sources and "amissi" in app.catalog)
+                await pilot.press("ctrl+1")
+                await pilot.pause()
+                await pilot.press("ctrl+5")
+                await pilot.pause()
+                assert app.query_one("#category").value == "poets"
+                assert "amissi" in app.catalog
+
+    asyncio.run(scenario())
+
+
 def test_compact_layout_on_narrow_terminal():
     async def scenario():
         app = DMSApp(EXAMPLES_DIR)

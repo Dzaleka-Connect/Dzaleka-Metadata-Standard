@@ -13,8 +13,6 @@ Usage:
 
 import errno
 import json
-import os
-import tempfile
 import uuid
 import webbrowser
 from datetime import date
@@ -258,9 +256,9 @@ def make_handler(records_dir: Path):
                         entry = next((item for item in entries if item["identifier"] == identifier), None)
                         if entry is None:
                             raise ServicesError("Source item not found.", 404)
-                        self._send_json({"draft": source_to_draft(entry)})
+                        self._send_json({"draft": source_to_draft(entry), "offline": services.offline})
                         return
-                    self._send_json({"items": entries, "cached": cached})
+                    self._send_json({"items": entries, "cached": cached, "offline": services.offline})
                 except ServicesError as error:
                     self._send_json({"error": str(error), "retry_after": error.retry_after}, error.status,
                                     {"Retry-After": error.retry_after} if error.retry_after else None)
@@ -448,32 +446,28 @@ def make_handler(records_dir: Path):
                 clean = {k: v for k, v in data.items() if not k.startswith("_")}
                 try:
                     with save_lock:
-                        records_dir.mkdir(parents=True, exist_ok=True)
-                        # Identity, not type or a shortened UUID, determines updates.
-                        filepath = records_dir / f"{uuid.UUID(data['id'])}.json"
-                        for candidate in sorted(records_dir.glob("*.json")):
-                            if candidate.is_symlink():
-                                continue
+                        from dms.services import find_imported_source, source_uris, write_local_record
+                        existing_path = None
+                        for target in source_uris(clean):
+                            existing_path = find_imported_source(records_dir, target)
+                            if existing_path is not None:
+                                break
+                        if existing_path is not None:
+                            current = None
                             try:
-                                existing = json.loads(candidate.read_text(encoding="utf-8"))
-                                if isinstance(existing, dict) and existing.get("id") == data["id"]:
-                                    filepath = candidate
-                                    break
+                                saved = json.loads(existing_path.read_text(encoding="utf-8"))
+                                if isinstance(saved, dict):
+                                    current = saved.get("id")
                             except (OSError, ValueError):
-                                continue
-                        temporary = None
-                        try:
-                            with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=records_dir,
-                                                             prefix=".dms-", suffix=".tmp", delete=False) as f:
-                                temporary = Path(f.name)
-                                json.dump(clean, f, indent=2, ensure_ascii=False)
-                                f.write("\n")
-                                f.flush()
-                                os.fsync(f.fileno())
-                            temporary.replace(filepath)
-                        finally:
-                            if temporary is not None:
-                                temporary.unlink(missing_ok=True)
+                                current = None
+                            if current != data.get("id"):
+                                self._send_json({
+                                    "saved": False,
+                                    "error": f"This source is already saved as {existing_path.name}.",
+                                    "file": existing_path.name,
+                                }, 409)
+                                return
+                        filepath = write_local_record(records_dir, clean)
                 except OSError:
                     self._send_json({"saved": False, "error": "Cannot write to the records directory."}, 500)
                     return
@@ -582,5 +576,4 @@ def start_server(port: int | None = None, records_dir: str | Path = "records", o
     except KeyboardInterrupt:
         console.print("\n  [yellow]Server stopped.[/yellow]")
     finally:
-        server.server_close()
         server.server_close()

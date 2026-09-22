@@ -14,6 +14,7 @@ export default function Sources({ onImport }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [cached, setCached] = useState(false);
+  const [offline, setOffline] = useState(false);
   const request = useRef(null);
   useEffect(() => {
     const controller = new AbortController();
@@ -29,7 +30,7 @@ export default function Sources({ onImport }) {
     try {
       const result = await api(`/api/sources/${collection}${id ? `?id=${encodeURIComponent(id)}` : ''}`, undefined, controller.signal);
       if (id) onImport(result.draft);
-      else { setItems(result.items); setCached(result.cached); }
+      else { setItems(result.items); setCached(result.cached); setOffline(!!result.offline); }
     } catch (error) {
       if (error.name === 'AbortError') return;
       setError(error.message + (error.retryAfter ? ` Retry in ${error.retryAfter} seconds.` : ''));
@@ -51,7 +52,7 @@ export default function Sources({ onImport }) {
     </div>
     {error && <div className="notice error" role="alert">{error}</div>}
     {items === null ? <div className="empty-state"><h2>Choose what to explore</h2><p>Browse encyclopedia entries, art, photographs, events, stories, poets, services, or mapped places.</p><p className="muted">Connects only when you load a collection. Responses are cached for five minutes.</p></div> : <>
-      <p className="list-caption" role="status">{filtered.length} of {items.length} items {cached && <Badge variant="secondary">Cached</Badge>}</p>
+      <p className="list-caption" role="status">{filtered.length} of {items.length} items {offline ? <Badge variant="warning">Saved copy</Badge> : cached && <Badge variant="secondary">Cached</Badge>}</p>
       <div className="source-grid">{filtered.map(item => <article className="source-card" key={item.identifier}>
         <div className="source-top"><Badge variant="secondary">{item.type}</Badge><a href={item.url} target="_blank" rel="noreferrer">Source &nearr;</a></div>
         <h2>{item.title}</h2><p className="source-description">{item.description || 'No description provided. Add context when reviewing the draft.'}</p>

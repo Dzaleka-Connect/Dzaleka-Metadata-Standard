@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { newRecord, setField, cleanRecord, addTerm } from './records.js';
+import { newRecord, setField, cleanRecord, addTerm, reviewGaps } from './records.js';
 
 test('new records have stable explicit identity', () => {
   assert.equal(newRecord('1.1.0', 'known-id').id, 'known-id');
@@ -28,6 +28,15 @@ test('internal filenames never leak into exported records', () => {
 
 test('clearing an array item keeps an editable row rather than a sparse array', () => {
   assert.deepEqual(setField({ creator: [{ name: 'Amina' }] }, ['creator', 0, 'name'], ''), { creator: [{}] });
+});
+
+test('review gaps name missing language, description, and consent', () => {
+  assert.deepEqual(reviewGaps({ title: 'Untitled' }), [
+    'Language is not recorded.',
+    'Description is empty.',
+    'Consent status is unknown.',
+  ]);
+  assert.deepEqual(reviewGaps({ language: 'en', description: 'A story.', rights: { consent_status: 'obtained' } }), []);
 });
 
 test('canonical references are deduplicated and deprecated terms cannot be added', () => {

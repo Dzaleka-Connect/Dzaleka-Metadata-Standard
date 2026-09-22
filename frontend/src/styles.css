@@ -61,6 +61,8 @@ fieldset { min-width: 0; border: 0; padding: 0; margin: 0; }
 .stats > div:last-child { border: 0; }
 .stats span { font: 400 32px/1.1 Georgia, serif; }
 .stats p { color: var(--dms-muted); margin-top: 9px; font-size: 12px; }
+.stat-button { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.stat-button:focus-visible { outline: 2px solid var(--dms-accent); outline-offset: 4px; }
 .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 22px; }
 .section-heading span { color: var(--dms-muted); font-size: 12px; }
 .page-heading { display: flex; justify-content: space-between; align-items: center; gap: 24px; margin: 0 0 32px; }

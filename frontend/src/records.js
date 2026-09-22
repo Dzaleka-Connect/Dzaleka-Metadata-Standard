@@ -9,6 +9,17 @@ export function newRecord(version, id = crypto.randomUUID()) {
   return { id, title: '', description: '', type: 'story', language: 'en', schema_version: version };
 }
 
+export function reviewGaps(record) {
+  const gaps = [];
+  if (!String(record?.language || '').trim()) gaps.push('Language is not recorded.');
+  if (!String(record?.description || '').trim()) gaps.push('Description is empty.');
+  const consent = record?.rights?.consent_status;
+  if (!consent || ['unknown', 'pending', 'withheld'].includes(consent)) {
+    gaps.push(`Consent status is ${consent || 'unknown'}.`);
+  }
+  return gaps;
+}
+
 export function cleanRecord(record) {
   return Object.fromEntries(Object.entries(record).filter(([key]) => !key.startsWith('_')));
 }
